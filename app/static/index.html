@@ -3,25 +3,25 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>AI Business FlowPilot · 飞书低代码业务自动化</title>
+  <title>AI Business FlowPilot | 飞书低代码供应链与客服自动化系统</title>
   <link rel="stylesheet" href="/static/style.css" />
 </head>
 <body>
-  <header class="hero">
+  <header class="topbar">
     <div>
-      <p class="eyebrow">AI Business FlowPilot · Feishu Low-Code · Multi-Model API Router</p>
-      <h1>飞书低代码供应链与客服自动化系统</h1>
-      <p class="subtitle">把订单、库存、异常、客户线索、日报、机器人通知，从 Excel 和人工催办升级成可追踪、可自动化、可 AI 总结的业务流程驾驶舱。</p>
+      <p class="eyebrow">AI Business FlowPilot V3</p>
+      <h1>飞书低代码女装电商 ERP / WMS / CRM 自动化 Demo</h1>
+      <p class="subtitle">面向广州女装电商场景，把店铺订单、库存、物流、客服、财务、审批流、Webhook、SQL、RAG 和预测模型路线串成可演示的业务闭环。</p>
       <div class="hero-actions">
-        <a href="/docs" target="_blank">打开 API 文档</a>
-        <a href="https://github.com/yangzhenheng/feishu-ai-business-automation-demo" target="_blank">GitHub 项目</a>
+        <a href="/docs" target="_blank">API Docs</a>
+        <a href="https://github.com/yangzhenheng/feishu-ai-business-automation-demo" target="_blank">GitHub</a>
       </div>
     </div>
-    <div class="hero-card">
+    <aside class="hero-card">
       <span>项目定位</span>
-      <strong>面试可展示的 AI 低代码实施作品集</strong>
-      <small>飞书表结构设计 / 自动化规则 / Webhook / AI日报 / CC Switch 多模型路由</small>
-    </div>
+      <strong>求职展示 / 面试演示 / GitHub 作品集</strong>
+      <small>不是线上生产系统，而是用于证明业务理解、低代码落地、RESTful API、Webhook、SQL 和 AI 接入能力的 Demo。</small>
+    </aside>
   </header>
 
   <main>
@@ -30,26 +30,69 @@
     <section class="panel full">
       <div class="panel-title">
         <div>
-          <h2>业务流程闭环</h2>
-          <p>对应岗位要求：飞书低代码、BPMN、Scrum/Kanban、owner 思维、跨部门推进。</p>
+          <p class="eyebrow dark">Ecommerce Closed Loop</p>
+          <h2>女装电商业务闭环</h2>
+          <p>客户下单 -> 店铺订单同步 -> ERP -> WMS -> 物流 -> 客服 -> 财务 -> AI日报</p>
         </div>
+        <button onclick="loadEcommerceFlow()">刷新闭环</button>
       </div>
-      <div class="flow">
-        <div>客户订单</div><span>→</span><div>库存校验</div><span>→</span><div>异常识别</div><span>→</span><div>审批/待办</div><span>→</span><div>机器人通知</div><span>→</span><div>AI日报复盘</div>
-      </div>
+      <div class="flow" id="ecommerce-flow"></div>
+      <div class="value-grid" id="ecommerce-values"></div>
     </section>
 
     <section class="grid-two">
       <div class="panel">
         <div class="panel-title">
-          <h2>AI 业务日报中心</h2>
+          <div>
+            <p class="eyebrow dark">External API Hub</p>
+            <h2>模拟外部 API 对接中心</h2>
+          </div>
+        </div>
+        <div class="command-row">
+          <button onclick="runMockApi('sync')">同步店铺订单</button>
+          <button onclick="runMockApi('inventory')">WMS库存校验</button>
+          <button onclick="runMockApi('logistics')">物流轨迹查询</button>
+          <button onclick="runMockApi('finance')">财务对账</button>
+          <button onclick="runMockApi('crm')">CRM线索沉淀</button>
+        </div>
+        <pre id="mock-api-result">选择一个按钮，模拟从店铺、WMS、物流、财务或 CRM 系统获取数据，并返回下一步业务动作。</pre>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">
+          <div>
+            <p class="eyebrow dark">MySQL / SQL</p>
+            <h2>SQL 能力展示</h2>
+          </div>
+          <button onclick="loadSqlExamples()">加载 SQL</button>
+        </div>
+        <div id="sql-examples" class="list"></div>
+      </div>
+    </section>
+
+    <section class="panel full">
+      <div class="panel-title">
+        <div>
+          <p class="eyebrow dark">AI Roadmap</p>
+          <h2>AI / RAG / 预测模型路线</h2>
+          <p>客服RAG、售后知识库、库存预测、爆款SKU预测、财务异常识别、多模型路由。</p>
+        </div>
+        <button onclick="loadAiRoadmap()">加载路线</button>
+      </div>
+      <div id="ai-roadmap" class="roadmap"></div>
+    </section>
+
+    <section class="grid-two">
+      <div class="panel">
+        <div class="panel-title">
+          <h2>AI 日报模块</h2>
           <button onclick="loadReport()">生成日报</button>
         </div>
         <pre id="report">点击“生成日报”，展示订单、库存、异常、待办和客户线索汇总。</pre>
       </div>
 
       <div class="panel">
-        <div class="panel-title"><h2>飞书/企业微信机器人指令中心</h2></div>
+        <div class="panel-title"><h2>飞书 / 企业微信机器人指令中心</h2></div>
         <div class="command-row">
           <button onclick="runCommand('/日报')">/日报</button>
           <button onclick="runCommand('/异常')">/异常</button>
@@ -57,7 +100,7 @@
           <button onclick="runCommand('/客户线索')">/客户线索</button>
           <button onclick="runCommand('/待办')">/待办</button>
         </div>
-        <pre id="command-result">选择一个命令，模拟飞书/企业微信机器人返回业务信息。</pre>
+        <pre id="command-result">选择一个命令，模拟飞书 / 企业微信机器人返回业务信息。</pre>
       </div>
     </section>
 
@@ -69,8 +112,8 @@
         <pre id="exception-ai">输出异常类型、严重等级、责任部门、建议动作和模型路由。</pre>
       </div>
       <div class="panel">
-        <h2>CC Switch 多模型 API 路由</h2>
-        <p class="muted">按任务选择模型，不是所有业务都用一个模型：日报重质量，异常分类重成本，客服重中文表达，内部知识库重隐私。</p>
+        <h2>CC Switch / 多模型 API 路由</h2>
+        <p class="muted">按任务选择模型：日报重质量，异常分类重成本，客服重中文表达，私域知识库重隐私。</p>
         <div class="command-row">
           <button onclick="selectModel('daily_report')">日报模型</button>
           <button onclick="selectModel('exception_classification')">异常分类</button>
@@ -96,7 +139,7 @@
     <section class="grid-two">
       <div class="panel">
         <h2>24小时 AI 客服 Demo</h2>
-        <textarea id="customer-message" placeholder="例如：我想做一个网站AI客服，能不能自动收集客户需求并推送到企业微信？">我想做一个网站AI客服，能不能自动收集客户需求并推送到企业微信？</textarea>
+        <textarea id="customer-message">我想做一个网站AI客服，能不能自动收集客户需求并推送到企业微信？</textarea>
         <div class="form-row">
           <input id="customer-name" placeholder="客户姓名" value="演示客户" />
           <input id="customer-contact" placeholder="联系方式" value="wechat-demo" />
@@ -111,7 +154,10 @@
     </section>
 
     <section class="panel full">
-      <div class="panel-title"><h2>飞书多维表格与自动化规则设计</h2><button onclick="loadFeishuDesign()">加载设计</button></div>
+      <div class="panel-title">
+        <h2>飞书多维表格与自动化规则设计</h2>
+        <button onclick="loadFeishuDesign()">加载设计</button>
+      </div>
       <div class="grid-two compact">
         <div><h3>多维表格 Schema</h3><div id="feishu-schema" class="list"></div></div>
         <div><h3>自动化 Workflows</h3><div id="feishu-workflows" class="list"></div></div>
@@ -120,7 +166,7 @@
   </main>
 
   <footer>
-    <p>AI Business FlowPilot · Feishu AI Business Automation Demo · 求职作品集 / 面试演示 / GitHub 项目</p>
+    <p>AI Business FlowPilot | 飞书低代码开发工程师（AI方向）作品集 Demo</p>
   </footer>
 
   <script src="/static/app.js"></script>

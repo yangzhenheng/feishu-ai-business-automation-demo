@@ -1,0 +1,32 @@
+[
+  {
+    "reconcile_id": "FIN-20260626-001",
+    "order_id": "SHOP-20260626-001",
+    "shop_name": "抖音小店-广州女装直播间",
+    "order_amount": 398.0,
+    "received_amount": 390.04,
+    "diff_amount": 7.96,
+    "diff_reason": "平台技术服务费扣点",
+    "suggested_action": "记录为正常平台扣点，自动归档"
+  },
+  {
+    "reconcile_id": "FIN-20260626-002",
+    "order_id": "SHOP-20260626-004",
+    "shop_name": "抖音小店-广州女装直播间",
+    "order_amount": 745.0,
+    "received_amount": 700.0,
+    "diff_amount": 45.0,
+    "diff_reason": "直播间优惠券承担方未确认",
+    "suggested_action": "提交财务复核审批，运营补充活动规则"
+  },
+  {
+    "reconcile_id": "FIN-20260626-003",
+    "order_id": "SHOP-20260626-005",
+    "shop_name": "天猫店-夏季通勤女装",
+    "order_amount": 219.0,
+    "received_amount": 0.0,
+    "diff_amount": 219.0,
+    "diff_reason": "售后换货中，平台暂缓结算",
+    "suggested_action": "关联售后单，待换货完成后自动复核"
+  }
+]

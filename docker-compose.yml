@@ -1,0 +1,49 @@
+services:
+  app:
+    build: .
+    container_name: flowpilot-app
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_PATH: /app/business_demo.db
+      FEISHU_WEBHOOK_URL: ${FEISHU_WEBHOOK_URL:-}
+      WECHAT_WORK_WEBHOOK_URL: ${WECHAT_WORK_WEBHOOK_URL:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_BASE_URL: ${OPENAI_BASE_URL:-https://api.openai.com/v1}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o-mini}
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_DATABASE: flowpilot
+      MYSQL_USER: flowpilot
+      MYSQL_PASSWORD: flowpilot_demo
+    volumes:
+      - app-data:/app/data/runtime
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  mysql:
+    image: mysql:8.4
+    container_name: flowpilot-mysql
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: flowpilot_root_demo
+      MYSQL_DATABASE: flowpilot
+      MYSQL_USER: flowpilot
+      MYSQL_PASSWORD: flowpilot_demo
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-pflowpilot_root_demo"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  app-data:
+  mysql-data:

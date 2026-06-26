@@ -6,6 +6,7 @@ async function getJson(url, options = {}) {
 
 function el(id) { return document.getElementById(id); }
 function safe(value) { return value === null || value === undefined || value === '' ? '未填写' : value; }
+function pretty(data) { return JSON.stringify(data, null, 2); }
 
 async function loadDashboard() {
   const data = await getJson('/api/dashboard');
@@ -20,24 +21,74 @@ async function loadDashboard() {
 
   el('exceptions').innerHTML = data.exceptions.map(e => `
     <div class="item">
-      <strong>${e.exception_no} · ${e.exception_type} · ${e.priority}</strong>
-      <small>${e.order_no}｜负责人：${e.owner}｜状态：${e.status}<br>${e.reason}</small>
+      <strong>${e.exception_no} | ${e.exception_type} | ${e.priority}</strong>
+      <small>${e.order_no} | 负责人：${e.owner} | 状态：${e.status}<br>${e.reason}</small>
     </div>
   `).join('') || '<p>暂无异常</p>';
 
   el('low-stock').innerHTML = data.low_stock.map(i => `
     <div class="item">
-      <strong>${i.sku} · ${i.product_name}</strong>
-      <small>当前库存：${i.current_stock}｜安全库存：${i.safety_stock}｜缺口：${i.safety_stock - i.current_stock}｜供应商：${i.supplier}｜仓库：${i.warehouse}</small>
+      <strong>${i.sku} | ${i.product_name}</strong>
+      <small>当前库存：${i.current_stock} | 安全库存：${i.safety_stock} | 缺口：${i.safety_stock - i.current_stock} | 供应商：${i.supplier} | 仓库：${i.warehouse}</small>
     </div>
   `).join('') || '<p>暂无库存预警</p>';
 
   el('leads').innerHTML = data.leads.map(l => `
     <div class="item">
-      <strong>${l.name} · ${l.intent_level}意向</strong>
-      <small>${l.demand}<br>联系方式：${safe(l.contact)}｜来源：${l.source}｜状态：${l.status}</small>
+      <strong>${l.name} | ${l.intent_level}意向</strong>
+      <small>${l.demand}<br>联系方式：${safe(l.contact)} | 来源：${l.source} | 状态：${l.status}</small>
     </div>
   `).join('') || '<p>暂无客户线索</p>';
+}
+
+async function loadEcommerceFlow() {
+  const data = await getJson('/api/ecommerce/flow');
+  el('ecommerce-flow').innerHTML = data.steps.map((step, index) => `
+    <div class="flow-step">
+      <span>${String(index + 1).padStart(2, '0')}</span>
+      <strong>${step.step}</strong>
+      <small>${step.system}</small>
+    </div>
+  `).join('');
+  el('ecommerce-values').innerHTML = data.low_code_value.map(value => `
+    <div class="value-card">${value}</div>
+  `).join('');
+}
+
+async function runMockApi(type) {
+  const routes = {
+    sync: ['/api/mock/shop/orders/sync', 'POST'],
+    inventory: ['/api/mock/wms/inventory/check', 'POST'],
+    logistics: ['/api/mock/logistics/track', 'POST'],
+    finance: ['/api/mock/finance/reconcile', 'POST'],
+    crm: ['/api/mock/crm/leads', 'POST']
+  };
+  const [url, method] = routes[type];
+  el('mock-api-result').textContent = '正在调用模拟 API...';
+  const data = await getJson(url, { method });
+  el('mock-api-result').textContent = pretty(data);
+}
+
+async function loadSqlExamples() {
+  const data = await getJson('/api/sql/examples');
+  el('sql-examples').innerHTML = data.examples.map(item => `
+    <div class="item sql-item">
+      <strong>${item.title}</strong>
+      <small>${item.business_value}</small>
+      <code>${item.sql}</code>
+    </div>
+  `).join('');
+}
+
+async function loadAiRoadmap() {
+  const data = await getJson('/api/ai/roadmap');
+  el('ai-roadmap').innerHTML = data.roadmap.map(item => `
+    <div class="roadmap-card">
+      <strong>${item.module}</strong>
+      <small>${item.business_value}</small>
+      <span>${item.phase}</span>
+    </div>
+  `).join('');
 }
 
 async function loadReport() {
@@ -98,7 +149,7 @@ async function loadFeishuDesign() {
     <div class="item">
       <strong>${t.table_name}</strong>
       <small>${t.purpose}</small>
-      <ul>${t.fields.slice(0, 5).map(f => `<li>${f.name}｜${f.type}｜${f.example}</li>`).join('')}</ul>
+      <ul>${t.fields.slice(0, 5).map(f => `<li>${f.name} | ${f.type} | ${f.example}</li>`).join('')}</ul>
     </div>
   `).join('');
   el('feishu-workflows').innerHTML = data.workflows.map(w => `
@@ -110,5 +161,8 @@ async function loadFeishuDesign() {
 }
 
 loadDashboard().catch(err => alert(err.message));
+loadEcommerceFlow().catch(() => {});
+loadSqlExamples().catch(() => {});
+loadAiRoadmap().catch(() => {});
 loadFeishuDesign().catch(() => {});
 selectModel('daily_report').catch(() => {});

@@ -1,0 +1,29 @@
+[
+  {
+    "lead_id": "CRM-20260626-001",
+    "customer_name": "直播间团购客户-陈小姐",
+    "customer_source": "抖音直播间",
+    "demand": "想为公司活动采购 80 件连衣裙，需要统一尺码建议和发票",
+    "intent_level": "高",
+    "follow_status": "待销售跟进",
+    "recommended_owner": "华南大客户销售"
+  },
+  {
+    "lead_id": "CRM-20260626-002",
+    "customer_name": "天猫复购客户-林女士",
+    "customer_source": "天猫店客服咨询",
+    "demand": "关注半身裙和T恤搭配，询问会员优惠",
+    "intent_level": "中",
+    "follow_status": "私域运营跟进",
+    "recommended_owner": "会员运营"
+  },
+  {
+    "lead_id": "CRM-20260626-003",
+    "customer_name": "拼多多售后客户-王女士",
+    "customer_source": "退换货工单",
+    "demand": "卫衣少发一件，希望补发并补偿优惠券",
+    "intent_level": "低",
+    "follow_status": "客服售后处理中",
+    "recommended_owner": "售后客服"
+  }
+]

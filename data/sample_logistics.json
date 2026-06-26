@@ -1,0 +1,29 @@
+[
+  {
+    "tracking_no": "YT202606260001",
+    "order_id": "SHOP-20260626-001",
+    "carrier": "圆通速递",
+    "logistics_status": "运输中",
+    "is_exception": false,
+    "exception_reason": "",
+    "suggested_action": "继续跟踪，预计 24 小时内到达华东中转场"
+  },
+  {
+    "tracking_no": "SF202606260089",
+    "order_id": "SHOP-20260626-004",
+    "carrier": "顺丰速运",
+    "logistics_status": "揽收延迟",
+    "is_exception": true,
+    "exception_reason": "佛山仓晚班未完成交接，团购订单存在交期风险",
+    "suggested_action": "升级仓储负责人，客服同步买家预计发货时间"
+  },
+  {
+    "tracking_no": "ZT202606260778",
+    "order_id": "SHOP-20260626-005",
+    "carrier": "中通快递",
+    "logistics_status": "退换货返回中",
+    "is_exception": true,
+    "exception_reason": "售后换码订单，原包裹退回后才能重新发小码",
+    "suggested_action": "客服确认换货 SKU 库存，避免二次缺货"
+  }
+]
