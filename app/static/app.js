@@ -171,7 +171,7 @@ async function loadSqlExamples() {
     target.innerHTML = data.examples.map(item => `
       <div class="item sql-item">
         <strong>${escapeHtml(item.title)}</strong>
-        <small>${escapeHtml(item.business_value)}</small>
+        <small>${escapeHtml(item.business_value || item.value || '')}</small>
         <code>${escapeHtml(item.sql)}</code>
       </div>
     `).join('');
@@ -188,8 +188,8 @@ async function loadAiRoadmap() {
     target.innerHTML = data.roadmap.map(item => `
       <div class="roadmap-card">
         <strong>${escapeHtml(item.name)}</strong>
-        <small>适用场景：${escapeHtml(item.scenario)}</small>
-        <span>${escapeHtml(item.business_value)}</span>
+        <small>适用场景：${escapeHtml(item.scenario || item.scene || '')}</small>
+        <span>${escapeHtml(item.business_value || item.value || '')}</span>
       </div>
     `).join('');
   } catch (error) {
