@@ -25,7 +25,27 @@
 ## 一句话价值
 
 > 用飞书多维表格承载业务数据，用自动化规则触发流程，用 Webhook 推送机器人，用 AI 生成日报和异常建议，用 CC Switch/多模型路由兼顾质量、速度、成本和隐私。
+## 项目预览
 
+### 业务驾驶舱
+
+![业务驾驶舱](assets/dashboard.png)
+
+### AI日报、机器人指令、异常分类与多模型路由
+
+![AI日报与模型路由](assets/ai-report-router.png)
+
+### 异常订单、库存预警、AI客服与客户线索
+
+![异常库存与客户线索](assets/exception-inventory-leads.png)
+
+### 飞书多维表格 Schema 与自动化规则
+
+![飞书表结构与自动化规则](assets/feishu-workflow-schema.png)
+
+### FastAPI 接口文档
+
+![API文档](assets/api-docs.png)
 ## 功能模块
 
 ### 1. 业务驾驶舱 Dashboard
