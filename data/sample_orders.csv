@@ -1,0 +1,6 @@
+order_no,customer,sku,quantity,due_date,owner,status,created_at
+SO-2026-001,华南服装旗舰店,SKU-TSHIRT-BLK-M,500,2026-06-28,王敏,生产中,2026-06-20
+SO-2026-002,广州渠道客户A,SKU-HOODIE-GRY-L,120,2026-06-27,李强,异常,2026-06-21
+SO-2026-003,直播电商客户B,SKU-CAP-WHT-F,1000,2026-06-30,陈静,待发货,2026-06-22
+SO-2026-004,深圳渠道客户C,SKU-TSHIRT-WHT-L,300,2026-06-26,赵磊,异常,2026-06-22
+SO-2026-005,跨境电商客户D,SKU-PANTS-BLK-XL,200,2026-07-01,王敏,待确认,2026-06-23

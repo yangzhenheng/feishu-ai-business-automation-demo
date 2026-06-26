@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AI低代码业务自动化 Demo</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <header class="hero">
+    <div>
+      <p class="eyebrow">AI + 飞书低代码 + 企业微信/飞书机器人 + AI客服</p>
+      <h1>企业业务自动化 Demo</h1>
+      <p class="subtitle">把订单、库存、异常、客户咨询、日报、通知流程，从 Excel 和人工催办升级为可追踪、可自动化、可 AI 总结的 MVP。</p>
+    </div>
+    <div class="hero-card">
+      <span>项目定位</span>
+      <strong>AI业务自动化实施作品集</strong>
+      <small>适合 GitHub 展示 / 面试演示 / 简历项目经历</small>
+    </div>
+  </header>
+
+  <main>
+    <section class="metrics" id="metrics"></section>
+
+    <section class="grid-two">
+      <div class="panel">
+        <div class="panel-title">
+          <h2>AI业务日报</h2>
+          <button onclick="loadReport()">生成日报</button>
+        </div>
+        <pre id="report">点击“生成日报”，展示订单、库存、异常、待办和客户线索汇总。</pre>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">
+          <h2>机器人指令中心</h2>
+        </div>
+        <div class="command-row">
+          <button onclick="runCommand('/日报')">/日报</button>
+          <button onclick="runCommand('/异常')">/异常</button>
+          <button onclick="runCommand('/库存')">/库存</button>
+          <button onclick="runCommand('/客户线索')">/客户线索</button>
+          <button onclick="runCommand('/待办')">/待办</button>
+        </div>
+        <pre id="command-result">选择一个命令，模拟飞书/企业微信机器人返回业务信息。</pre>
+      </div>
+    </section>
+
+    <section class="grid-two">
+      <div class="panel">
+        <h2>异常订单</h2>
+        <div id="exceptions" class="list"></div>
+      </div>
+      <div class="panel">
+        <h2>库存预警</h2>
+        <div id="low-stock" class="list"></div>
+      </div>
+    </section>
+
+    <section class="grid-two">
+      <div class="panel">
+        <h2>24小时AI客服 Demo</h2>
+        <textarea id="customer-message" placeholder="例如：我想做一个网站AI客服，能不能自动收集客户需求并推送到企业微信？"></textarea>
+        <div class="form-row">
+          <input id="customer-name" placeholder="客户姓名" value="演示客户" />
+          <input id="customer-contact" placeholder="联系方式" value="wechat-demo" />
+        </div>
+        <button onclick="askCustomerService()">发送咨询</button>
+        <pre id="customer-answer">AI客服会回答问题，并把客户意向沉淀为线索。</pre>
+      </div>
+      <div class="panel">
+        <h2>客户线索</h2>
+        <div id="leads" class="list"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Feishu AI Business Automation Demo · 用于求职作品集与面试演示</p>
+  </footer>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+sku,product_name,current_stock,safety_stock,supplier,warehouse
+SKU-TSHIRT-BLK-M,黑色T恤 M码,820,300,供应商A,广州仓
+SKU-HOODIE-GRY-L,灰色卫衣 L码,40,120,供应商B,佛山仓
+SKU-CAP-WHT-F,白色鸭舌帽,2600,800,供应商C,广州仓
+SKU-TSHIRT-WHT-L,白色T恤 L码,80,200,供应商A,广州仓
+SKU-PANTS-BLK-XL,黑色长裤 XL码,380,150,供应商D,东莞仓
