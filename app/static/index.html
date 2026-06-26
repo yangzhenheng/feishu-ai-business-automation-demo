@@ -9,18 +9,18 @@
 <body>
   <header class="topbar">
     <div>
-      <p class="eyebrow">AI Business FlowPilot V3</p>
-      <h1>飞书低代码女装电商 ERP / WMS / CRM 自动化 Demo</h1>
-      <p class="subtitle">面向广州女装电商场景，把店铺订单、库存、物流、客服、财务、审批流、Webhook、SQL、RAG 和预测模型路线串成可演示的业务闭环。</p>
+      <p class="eyebrow">AI Business FlowPilot V4</p>
+      <h1>一键跑通女装电商 AI 业务闭环</h1>
+      <p class="subtitle">把店铺订单、ERP、WMS、物流、客服、CRM、财务、飞书通知和 AI 日报串成可点击演示的低代码自动化流程。</p>
       <div class="hero-actions">
         <a href="/docs" target="_blank">API Docs</a>
         <a href="https://github.com/yangzhenheng/feishu-ai-business-automation-demo" target="_blank">GitHub</a>
       </div>
     </div>
     <aside class="hero-card">
-      <span>项目定位</span>
-      <strong>求职展示 / 面试演示 / GitHub 作品集</strong>
-      <small>不是线上生产系统，而是用于证明业务理解、低代码落地、RESTful API、Webhook、SQL 和 AI 接入能力的 Demo。</small>
+      <span>面试演示重点</span>
+      <strong>不是静态页面，而是一条可运行的业务流程</strong>
+      <small>适合展示飞书低代码、Python RESTful API、Webhook、SQL、ERP/WMS/CRM、AI/LLM 和部署意识。</small>
     </aside>
   </header>
 
@@ -40,6 +40,30 @@
       <div class="value-grid" id="ecommerce-values"></div>
     </section>
 
+    <section class="panel full demo-panel">
+      <div class="panel-title">
+        <div>
+          <p class="eyebrow dark">V4 Full Workflow</p>
+          <h2>一键跑通业务闭环</h2>
+          <p>点击后按顺序模拟：店铺订单 -> ERP -> WMS -> 异常 -> 飞书通知 -> CRM -> 财务 -> AI日报。</p>
+        </div>
+        <button class="primary-action" onclick="runFullFlow()">一键跑通业务闭环</button>
+      </div>
+      <div id="full-flow-status" class="status-line">等待演示启动。</div>
+      <div id="full-flow-steps" class="workflow-grid"></div>
+      <div class="grid-two compact result-grid">
+        <div class="result-block">
+          <h3>AI 日报</h3>
+          <pre id="full-flow-report">点击按钮后生成 AI 业务日报。</pre>
+        </div>
+        <div class="result-block">
+          <h3>飞书推送状态</h3>
+          <pre id="feishu-push-status">等待流程执行。</pre>
+        </div>
+      </div>
+      <div id="business-values" class="value-grid"></div>
+    </section>
+
     <section class="grid-two">
       <div class="panel">
         <div class="panel-title">
@@ -55,9 +79,22 @@
           <button onclick="runMockApi('finance')">财务对账</button>
           <button onclick="runMockApi('crm')">CRM线索沉淀</button>
         </div>
-        <pre id="mock-api-result">选择一个按钮，模拟从店铺、WMS、物流、财务或 CRM 系统获取数据，并返回下一步业务动作。</pre>
+        <div id="mock-api-result" class="business-card-placeholder">选择一个按钮，查看模块名称、核心结果、风险点和下一步动作。</div>
       </div>
 
+      <div class="panel">
+        <div class="panel-title">
+          <div>
+            <p class="eyebrow dark">Workflow Logs</p>
+            <h2>业务流程执行日志</h2>
+          </div>
+          <button onclick="loadWorkflowLogs()">刷新日志</button>
+        </div>
+        <div id="workflow-logs" class="list"></div>
+      </div>
+    </section>
+
+    <section class="grid-two">
       <div class="panel">
         <div class="panel-title">
           <div>
@@ -68,18 +105,17 @@
         </div>
         <div id="sql-examples" class="list"></div>
       </div>
-    </section>
 
-    <section class="panel full">
-      <div class="panel-title">
-        <div>
-          <p class="eyebrow dark">AI Roadmap</p>
-          <h2>AI / RAG / 预测模型路线</h2>
-          <p>客服RAG、售后知识库、库存预测、爆款SKU预测、财务异常识别、多模型路由。</p>
+      <div class="panel">
+        <div class="panel-title">
+          <div>
+            <p class="eyebrow dark">AI Roadmap</p>
+            <h2>AI / RAG / 预测模型路线</h2>
+          </div>
+          <button onclick="loadAiRoadmap()">加载路线</button>
         </div>
-        <button onclick="loadAiRoadmap()">加载路线</button>
+        <div id="ai-roadmap" class="roadmap"></div>
       </div>
-      <div id="ai-roadmap" class="roadmap"></div>
     </section>
 
     <section class="grid-two">

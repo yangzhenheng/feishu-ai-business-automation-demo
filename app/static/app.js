@@ -34,6 +34,20 @@ function showError(targetId, error) {
   }
 }
 
+function renderBusinessCard(data, detailHtml = '') {
+  return `
+    <div class="business-card">
+      <div class="business-card-head">
+        <span>${escapeHtml(data.module || '业务模块')}</span>
+        <strong>${escapeHtml(data.core_result || '已完成接口调用')}</strong>
+      </div>
+      ${detailHtml}
+      <div class="risk-line"><b>风险点：</b>${escapeHtml(data.risk || '暂无明显风险')}</div>
+      <div class="next-line"><b>下一步：</b>${escapeHtml(data.next_action || '等待下一步处理')}</div>
+    </div>
+  `;
+}
+
 async function loadDashboard() {
   try {
     const data = await getJson('/api/dashboard');
@@ -48,22 +62,22 @@ async function loadDashboard() {
 
     el('exceptions').innerHTML = data.exceptions.map(item => `
       <div class="item">
-        <strong>${item.exception_no} | ${item.exception_type} | ${item.priority}</strong>
-        <small>${item.order_no} | 负责人：${item.owner} | 状态：${item.status}<br>${item.reason}</small>
+        <strong>${escapeHtml(item.exception_no)} | ${escapeHtml(item.exception_type)} | ${escapeHtml(item.priority)}</strong>
+        <small>${escapeHtml(item.order_no)} | 负责人：${escapeHtml(item.owner)} | 状态：${escapeHtml(item.status)}<br>${escapeHtml(item.reason)}</small>
       </div>
     `).join('') || '<p>暂无异常</p>';
 
     el('low-stock').innerHTML = data.low_stock.map(item => `
       <div class="item">
-        <strong>${item.sku} | ${item.product_name}</strong>
-        <small>当前库存：${item.current_stock} | 安全库存：${item.safety_stock} | 缺口：${item.safety_stock - item.current_stock} | 供应商：${item.supplier} | 仓库：${item.warehouse}</small>
+        <strong>${escapeHtml(item.sku)} | ${escapeHtml(item.product_name)}</strong>
+        <small>当前库存：${item.current_stock} | 安全库存：${item.safety_stock} | 缺口：${item.safety_stock - item.current_stock} | 供应商：${escapeHtml(item.supplier)} | 仓库：${escapeHtml(item.warehouse)}</small>
       </div>
     `).join('') || '<p>暂无库存预警</p>';
 
     el('leads').innerHTML = data.leads.map(item => `
       <div class="item">
-        <strong>${item.name} | ${item.intent_level}意向</strong>
-        <small>${item.demand}<br>联系方式：${safe(item.contact)} | 来源：${item.source} | 状态：${item.status}</small>
+        <strong>${escapeHtml(item.name)} | ${escapeHtml(item.intent_level)}意向</strong>
+        <small>${escapeHtml(item.demand)}<br>联系方式：${escapeHtml(safe(item.contact))} | 来源：${escapeHtml(item.source)} | 状态：${escapeHtml(item.status)}</small>
       </div>
     `).join('') || '<p>暂无客户线索</p>';
   } catch (error) {
@@ -82,61 +96,44 @@ async function loadEcommerceFlow() {
     flowTarget.innerHTML = data.flow.map((step, index) => `
       <div class="flow-step">
         <span>${String(index + 1).padStart(2, '0')}</span>
-        <strong>${step}</strong>
-        <small>${data.scene}</small>
+        <strong>${escapeHtml(step)}</strong>
+        <small>${escapeHtml(data.scene)}</small>
       </div>
     `).join('');
-    valueTarget.innerHTML = `<div class="value-card">${data.business_value}</div>`;
+    valueTarget.innerHTML = `<div class="value-card">${escapeHtml(data.business_value)}</div>`;
   } catch (error) {
-    flowTarget.innerHTML = `<div class="flow-step error">接口调用失败：${error.message}</div>`;
+    flowTarget.innerHTML = `<div class="flow-step error">接口调用失败：${escapeHtml(error.message)}</div>`;
   }
 }
 
-function renderMockApiResult(type, data) {
-  if (type === 'sync') {
-    return `模块：${data.module}
-同步订单：${data.synced_count}
-异常订单：${data.exception_count}
-下一步：${data.next_action}`;
+async function runFullFlow() {
+  el('full-flow-status').textContent = '正在执行完整业务闭环...';
+  el('full-flow-steps').innerHTML = '';
+  el('full-flow-report').textContent = '正在生成 AI 日报...';
+  el('feishu-push-status').textContent = '正在检查飞书推送...';
+  el('business-values').innerHTML = '';
+
+  try {
+    const data = await getJson('/api/demo/run-full-flow', { method: 'POST' });
+    el('full-flow-status').textContent = `${data.title} | ${data.scene}`;
+    el('full-flow-steps').innerHTML = data.steps.map(step => `
+      <div class="workflow-step ${step.status}">
+        <span>Step ${step.step}</span>
+        <strong>${escapeHtml(step.name)}</strong>
+        <small>${escapeHtml(step.summary)}</small>
+      </div>
+    `).join('');
+    el('full-flow-report').textContent = data.ai_report;
+    el('feishu-push-status').textContent = data.feishu_push;
+    el('business-values').innerHTML = data.business_value.map(value => `
+      <div class="value-card">${escapeHtml(value)}</div>
+    `).join('');
+    await loadWorkflowLogs();
+  } catch (error) {
+    el('full-flow-status').textContent = `接口调用失败：${error.message}`;
+    el('full-flow-report').textContent = 'AI 日报生成失败。';
+    el('feishu-push-status').textContent = '未执行推送。';
   }
-
-  if (type === 'inventory') {
-    const rows = data.low_stock.map(item => `${item.sku} ${item.product}
-当前库存：${item.stock}
-安全库存：${item.safe_stock}
-缺口：${item.gap}`).join('\n\n');
-    return `模块：${data.module}
-
-${rows}
-
-建议：${data.next_action}`;
-  }
-
-  if (type === 'logistics') {
-    return `模块：${data.module}
-运单号：${data.tracking_no}
-状态：${data.status}
-原因：${data.reason}
-下一步：${data.next_action}`;
-  }
-
-  if (type === 'finance') {
-    return `模块：${data.module}
-订单金额：${data.order_amount}
-已回款金额：${data.received_amount}
-差异金额：${data.difference}
-差异原因：${data.reason}
-下一步：${data.next_action}`;
-  }
-
-  if (type === 'crm') {
-    const rows = data.leads.map(item => `${item.name} | 来源：${item.source} | 意向：${item.intent} | 状态：${item.status}`).join('\n');
-    return `模块：${data.module}
-${rows}
-下一步：${data.next_action}`;
-  }
-
-  return JSON.stringify(data, null, 2);
 }
 
 async function runMockApi(type) {
@@ -157,9 +154,45 @@ async function runMockApi(type) {
   el('mock-api-result').textContent = '正在调用模拟 API...';
   try {
     const data = await getJson(url, { method });
-    el('mock-api-result').textContent = renderMockApiResult(type, data);
+    let detailHtml = '';
+    if (type === 'inventory') {
+      detailHtml = `<div class="mini-grid">${data.low_stock.map(item => `
+        <div><b>${escapeHtml(item.sku)}</b><br>${escapeHtml(item.product)}<br>当前 ${item.stock} / 安全 ${item.safe_stock} / 缺口 ${item.gap}</div>
+      `).join('')}</div>`;
+    }
+    if (type === 'finance') {
+      detailHtml = `<div class="numbers"><span>订单金额 ${data.order_amount}</span><span>已回款 ${data.received_amount}</span><span>差异 ${data.difference}</span></div>`;
+    }
+    if (type === 'crm') {
+      detailHtml = `<div class="mini-grid">${data.leads.map(item => `
+        <div><b>${escapeHtml(item.name)}</b><br>来源：${escapeHtml(item.source)}<br>意向：${escapeHtml(item.intent)} | ${escapeHtml(item.status)}</div>
+      `).join('')}</div>`;
+    }
+    if (type === 'sync') {
+      detailHtml = `<div class="numbers"><span>同步 ${data.synced_count}</span><span>异常 ${data.exception_count}</span></div>`;
+    }
+    if (type === 'logistics') {
+      detailHtml = `<div class="numbers"><span>运单 ${escapeHtml(data.tracking_no)}</span><span>状态 ${escapeHtml(data.status)}</span><span>${escapeHtml(data.reason)}</span></div>`;
+    }
+    el('mock-api-result').innerHTML = renderBusinessCard(data, detailHtml);
   } catch (error) {
     showError('mock-api-result', error);
+  }
+}
+
+async function loadWorkflowLogs() {
+  const target = el('workflow-logs');
+  target.innerHTML = '<div class="item">正在加载执行日志...</div>';
+  try {
+    const data = await getJson('/api/workflow/logs');
+    target.innerHTML = data.map(log => `
+      <div class="item log-item ${escapeHtml(log.status)}">
+        <strong>${escapeHtml(log.workflow)} | ${escapeHtml(log.status)}</strong>
+        <small>${escapeHtml(log.time)} | trigger: ${escapeHtml(log.trigger)}<br>${escapeHtml(log.summary)}</small>
+      </div>
+    `).join('');
+  } catch (error) {
+    target.innerHTML = `<div class="item error">接口调用失败：${escapeHtml(error.message)}</div>`;
   }
 }
 
@@ -176,7 +209,7 @@ async function loadSqlExamples() {
       </div>
     `).join('');
   } catch (error) {
-    target.innerHTML = `<div class="item error">接口调用失败：${error.message}</div>`;
+    target.innerHTML = `<div class="item error">接口调用失败：${escapeHtml(error.message)}</div>`;
   }
 }
 
@@ -193,7 +226,7 @@ async function loadAiRoadmap() {
       </div>
     `).join('');
   } catch (error) {
-    target.innerHTML = `<div class="roadmap-card error">接口调用失败：${error.message}</div>`;
+    target.innerHTML = `<div class="roadmap-card error">接口调用失败：${escapeHtml(error.message)}</div>`;
   }
 }
 
@@ -290,19 +323,19 @@ async function loadFeishuDesign() {
     const data = await getJson('/api/feishu/design');
     schemaTarget.innerHTML = data.tables.map(table => `
       <div class="item">
-        <strong>${table.table_name}</strong>
-        <small>${table.purpose}</small>
-        <ul>${table.fields.slice(0, 5).map(field => `<li>${field.name} | ${field.type} | ${field.example}</li>`).join('')}</ul>
+        <strong>${escapeHtml(table.table_name)}</strong>
+        <small>${escapeHtml(table.purpose)}</small>
+        <ul>${table.fields.slice(0, 5).map(field => `<li>${escapeHtml(field.name)} | ${escapeHtml(field.type)} | ${escapeHtml(field.example)}</li>`).join('')}</ul>
       </div>
     `).join('');
     workflowTarget.innerHTML = data.workflows.map(workflow => `
       <div class="item">
-        <strong>${workflow.name}</strong>
-        <small>触发：${workflow.trigger}<br>动作：${workflow.action}<br>价值：${workflow.business_value}</small>
+        <strong>${escapeHtml(workflow.name)}</strong>
+        <small>触发：${escapeHtml(workflow.trigger)}<br>动作：${escapeHtml(workflow.action)}<br>价值：${escapeHtml(workflow.business_value)}</small>
       </div>
     `).join('');
   } catch (error) {
-    schemaTarget.innerHTML = `<div class="item error">接口调用失败：${error.message}</div>`;
+    schemaTarget.innerHTML = `<div class="item error">接口调用失败：${escapeHtml(error.message)}</div>`;
     workflowTarget.innerHTML = '';
   }
 }
@@ -316,7 +349,9 @@ Object.assign(window, {
   loadFeishuDesign,
   loadReport,
   loadSqlExamples,
+  loadWorkflowLogs,
   runCommand,
+  runFullFlow,
   runMockApi,
   selectModel
 });
@@ -326,4 +361,5 @@ loadEcommerceFlow();
 loadSqlExamples();
 loadAiRoadmap();
 loadFeishuDesign();
+loadWorkflowLogs();
 selectModel('daily_report');
