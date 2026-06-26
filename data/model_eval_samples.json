@@ -1,0 +1,17 @@
+[
+  {
+    "task_type": "daily_report",
+    "prompt": "根据今日订单、库存和异常数据生成业务日报",
+    "expected_output": "包含订单总数、异常数量、高风险事项和明日跟进建议"
+  },
+  {
+    "task_type": "exception_classification",
+    "prompt": "客户订单延期，库存不足，供应商未确认发货",
+    "expected_output": "异常类型、严重等级、责任部门、处理建议"
+  },
+  {
+    "task_type": "customer_service",
+    "prompt": "客户咨询是否可以做AI客服和网站自动回复",
+    "expected_output": "服务介绍、需求确认、下一步沟通建议"
+  }
+]

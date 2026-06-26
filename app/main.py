@@ -12,12 +12,15 @@ from pydantic import BaseModel
 from app.db import get_connection, init_db
 from app.services.business import (
     build_rule_based_report,
+    classify_exception_text,
     command_response,
     customer_service_answer,
     get_dashboard,
 )
 from app.services.llm import generate_llm_report
 from app.services.notifier import notify_all
+from app.services.model_router import get_all_routes, select_model
+from app.services.feishu_design import get_feishu_design
 
 app = FastAPI(
     title="Feishu AI Business Automation Demo",
@@ -43,6 +46,14 @@ class CustomerServiceRequest(BaseModel):
 
 class NotifyRequest(BaseModel):
     text: str
+
+
+class ExceptionClassifyRequest(BaseModel):
+    text: str
+
+
+class ModelRouteRequest(BaseModel):
+    task_type: str
 
 
 @app.on_event("startup")
@@ -121,6 +132,29 @@ def api_customer_service(req: CustomerServiceRequest):
         finally:
             conn.close()
     return answer
+
+
+@app.get("/api/feishu/design")
+def api_feishu_design():
+    return get_feishu_design()
+
+
+@app.get("/api/model-routing")
+def api_model_routing():
+    return get_all_routes()
+
+
+@app.post("/api/model-routing/select")
+def api_model_routing_select(req: ModelRouteRequest):
+    return select_model(req.task_type)
+
+
+@app.post("/api/ai/exception-classify")
+def api_exception_classify(req: ExceptionClassifyRequest):
+    route = select_model("exception_classification")
+    result = classify_exception_text(req.text)
+    result["model_route"] = route
+    return result
 
 
 @app.post("/api/notify/test")
