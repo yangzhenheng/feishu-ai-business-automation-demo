@@ -48,6 +48,30 @@ function renderBusinessCard(data, detailHtml = '') {
   `;
 }
 
+function renderFeishuPushStatus(data) {
+  const detail = data.feishu_push_detail || {};
+  const rawStatus = detail.status || data.feishu_push || 'skipped';
+  const normalizedStatus = rawStatus === 'success' ? 'success' : rawStatus.startsWith('failed') ? 'failed' : rawStatus;
+  const title = detail.title || (normalizedStatus === 'success' ? '推送成功' : normalizedStatus === 'failed' ? '推送失败' : '推送跳过');
+  const reason = detail.reason || (normalizedStatus === 'success' ? 'Webhook 已返回成功响应' : data.feishu_push || '未配置飞书 Webhook');
+  const nextAction = detail.next_action || (normalizedStatus === 'success' ? '负责人可在群内继续跟进异常单和财务复核' : '检查 .env 中的 FEISHU_WEBHOOK_URL 配置');
+  const messageSummary = detail.message_summary || (data.ai_report || '').split('。')[0] + '。';
+
+  return `
+    <div class="push-card ${escapeHtml(normalizedStatus)}">
+      <div class="push-card-head">
+        <span class="status-badge ${escapeHtml(normalizedStatus)}">${escapeHtml(title)}</span>
+        <strong>平台：${escapeHtml(detail.platform || '飞书机器人')}</strong>
+      </div>
+      <div class="push-field"><b>群聊：</b>${escapeHtml(detail.group || 'AI业务自动化Demo测试群')}</div>
+      <div class="push-field"><b>时间：</b>${escapeHtml(detail.time || new Date().toLocaleString('zh-CN', { hour12: false }))}</div>
+      <div class="push-field"><b>消息摘要：</b>${escapeHtml(messageSummary)}</div>
+      <div class="push-field"><b>原因：</b>${escapeHtml(reason)}</div>
+      <div class="push-field"><b>下一步建议：</b>${escapeHtml(nextAction)}</div>
+    </div>
+  `;
+}
+
 async function loadDashboard() {
   try {
     const data = await getJson('/api/dashboard');
@@ -88,6 +112,7 @@ async function loadDashboard() {
 async function loadEcommerceFlow() {
   const flowTarget = el('ecommerce-flow');
   const valueTarget = el('ecommerce-values');
+  if (!flowTarget || !valueTarget) return;
   flowTarget.innerHTML = '<div class="flow-step"><strong>正在加载业务闭环...</strong></div>';
   valueTarget.innerHTML = '';
 
@@ -110,7 +135,7 @@ async function runFullFlow() {
   el('full-flow-status').textContent = '正在执行完整业务闭环...';
   el('full-flow-steps').innerHTML = '';
   el('full-flow-report').textContent = '正在生成 AI 日报...';
-  el('feishu-push-status').textContent = '正在检查飞书推送...';
+  el('feishu-push-status').innerHTML = '<div class="push-card pending">正在检查飞书推送...</div>';
   el('business-values').innerHTML = '';
 
   try {
@@ -124,7 +149,7 @@ async function runFullFlow() {
       </div>
     `).join('');
     el('full-flow-report').textContent = data.ai_report;
-    el('feishu-push-status').textContent = data.feishu_push;
+    el('feishu-push-status').innerHTML = renderFeishuPushStatus(data);
     el('business-values').innerHTML = data.business_value.map(value => `
       <div class="value-card">${escapeHtml(value)}</div>
     `).join('');
@@ -132,7 +157,13 @@ async function runFullFlow() {
   } catch (error) {
     el('full-flow-status').textContent = `接口调用失败：${error.message}`;
     el('full-flow-report').textContent = 'AI 日报生成失败。';
-    el('feishu-push-status').textContent = '未执行推送。';
+    el('feishu-push-status').innerHTML = `
+      <div class="push-card failed">
+        <span class="status-badge failed">推送失败</span>
+        <div class="push-field"><b>原因：</b>${escapeHtml(error.message)}</div>
+        <div class="push-field"><b>下一步建议：</b>检查 /api/demo/run-full-flow 接口和服务日志。</div>
+      </div>
+    `;
   }
 }
 
@@ -187,8 +218,17 @@ async function loadWorkflowLogs() {
     const data = await getJson('/api/workflow/logs');
     target.innerHTML = data.map(log => `
       <div class="item log-item ${escapeHtml(log.status)}">
-        <strong>${escapeHtml(log.workflow)} | ${escapeHtml(log.status)}</strong>
-        <small>${escapeHtml(log.time)} | trigger: ${escapeHtml(log.trigger)}<br>${escapeHtml(log.summary)}</small>
+        <div class="log-title">
+          <strong>${escapeHtml(log.workflow)}</strong>
+          <span class="status-badge ${escapeHtml(log.status)}">${escapeHtml(log.status)}</span>
+        </div>
+        <div class="log-fields">
+          <span><b>执行时间：</b>${escapeHtml(log.time)}</span>
+          <span><b>工作流名称：</b>${escapeHtml(log.workflow)}</span>
+          <span><b>触发方式：</b>${escapeHtml(log.trigger)}</span>
+          <span><b>执行状态：</b>${escapeHtml(log.status)}</span>
+          <span class="log-summary"><b>结果摘要：</b>${escapeHtml(log.summary)}</span>
+        </div>
       </div>
     `).join('');
   } catch (error) {
@@ -357,7 +397,6 @@ Object.assign(window, {
 });
 
 loadDashboard();
-loadEcommerceFlow();
 loadSqlExamples();
 loadAiRoadmap();
 loadFeishuDesign();

@@ -66,7 +66,7 @@ def on_startup() -> None:
 
 @app.get("/", response_class=HTMLResponse)
 def index() -> str:
-    return (BASE_DIR / "static" / "index.html").read_text(encoding="gb18030")
+    return (BASE_DIR / "static" / "index.html").read_text(encoding="utf-8")
 
 
 @app.get("/health")

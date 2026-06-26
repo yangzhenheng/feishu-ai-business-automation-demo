@@ -112,6 +112,14 @@ main { padding: 28px clamp(20px, 5vw, 72px); }
 .panel.full { margin-bottom: 20px; }
 .panel-title { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
 .panel-title p, .muted { color: var(--muted); line-height: 1.65; margin: 0; }
+.section-head-inline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.section-head-inline h3 { margin: 0; }
 
 button {
   border: 0;
@@ -209,6 +217,29 @@ textarea { min-height: 100px; resize: vertical; }
   border-top: 4px solid var(--brand);
 }
 
+.closed-loop-line {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: 8px;
+  margin: 18px 0 12px;
+}
+
+.closed-loop-line span {
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px;
+  background: #f8fbff;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
 .status-line {
   margin: 16px 0;
   padding: 12px 14px;
@@ -262,12 +293,20 @@ textarea { min-height: 100px; resize: vertical; }
   border-left: 5px solid var(--warning);
 }
 
+.workflow-step.failed {
+  border-left: 5px solid var(--danger);
+}
+
 .result-grid {
-  margin-top: 6px;
+  margin-top: 10px;
 }
 
 .result-block {
   min-width: 0;
+}
+
+.value-grid-tight {
+  grid-template-columns: 1fr;
 }
 
 .business-card-placeholder {
@@ -276,6 +315,80 @@ textarea { min-height: 100px; resize: vertical; }
   padding: 18px;
   color: var(--muted);
   background: #fbfcff;
+}
+
+.feishu-card {
+  min-height: 100%;
+}
+
+.push-card {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 16px;
+  background: #fbfcff;
+  line-height: 1.6;
+}
+
+.push-card.success {
+  border-left: 5px solid var(--teal);
+}
+
+.push-card.skipped,
+.push-card.pending,
+.push-card.warning {
+  border-left: 5px solid var(--warning);
+}
+
+.push-card.failed {
+  border-left: 5px solid var(--danger);
+}
+
+.push-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.push-card-head strong {
+  font-size: 16px;
+}
+
+.push-field {
+  margin-top: 8px;
+  padding: 9px 10px;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1;
+  background: #eef2f7;
+  color: var(--muted);
+}
+
+.status-badge.success {
+  background: #e7f8f3;
+  color: #067647;
+}
+
+.status-badge.warning,
+.status-badge.skipped {
+  background: #fff4df;
+  color: #b54708;
+}
+
+.status-badge.failed {
+  background: #fee4e2;
+  color: #b42318;
 }
 
 .business-card {
@@ -337,6 +450,34 @@ textarea { min-height: 100px; resize: vertical; }
   border-left: 5px solid var(--teal);
 }
 
+.log-item.warning {
+  border-left: 5px solid var(--warning);
+}
+
+.log-item.failed {
+  border-left: 5px solid var(--danger);
+}
+
+.log-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.log-fields {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.log-summary {
+  color: var(--text);
+}
+
 .error {
   color: var(--danger);
 }
@@ -344,14 +485,14 @@ textarea { min-height: 100px; resize: vertical; }
 footer { color: var(--muted); text-align: center; padding: 30px; }
 
 @media (max-width: 1180px) {
-  .flow { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .flow, .closed-loop-line { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   .value-grid, .roadmap { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .workflow-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .mini-grid, .numbers { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 860px) {
-  .topbar, .grid-two, .metrics, .flow, .value-grid, .roadmap, .workflow-grid { grid-template-columns: 1fr; }
+  .topbar, .grid-two, .metrics, .flow, .closed-loop-line, .value-grid, .roadmap, .workflow-grid { grid-template-columns: 1fr; }
   .metrics { margin-top: 0; }
   .topbar { padding-bottom: 42px; }
   .panel-title { align-items: flex-start; flex-direction: column; }

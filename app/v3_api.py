@@ -343,6 +343,43 @@ def build_full_flow_result() -> Dict[str, Any]:
     }
 
 
+def build_feishu_push_detail(feishu_push: str, ai_report: str) -> Dict[str, str]:
+    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    message_summary = ai_report.split("。", 1)[0] + "。"
+    base = {
+        "platform": "飞书机器人",
+        "group": "AI业务自动化Demo测试群",
+        "time": now,
+        "message_summary": message_summary,
+    }
+
+    if feishu_push == "success":
+        return {
+            **base,
+            "status": "success",
+            "title": "推送成功",
+            "reason": "Webhook 已返回成功响应",
+            "next_action": "负责人可在群内继续跟进异常单和财务复核",
+        }
+
+    if feishu_push.startswith("skipped"):
+        return {
+            **base,
+            "status": "skipped",
+            "title": "推送跳过",
+            "reason": "FEISHU_WEBHOOK_URL is empty",
+            "next_action": "在 .env 配置 FEISHU_WEBHOOK_URL 后重新运行演示",
+        }
+
+    return {
+        **base,
+        "status": "failed",
+        "title": "推送失败",
+        "reason": feishu_push.replace("failed:", "").strip() or "飞书机器人接口未返回成功状态",
+        "next_action": "检查 Webhook 地址、网络连通性和机器人权限",
+    }
+
+
 @router.post("/api/demo/run-full-flow")
 def api_demo_run_full_flow():
     result = build_full_flow_result()
@@ -356,6 +393,8 @@ def api_demo_run_full_flow():
             result["feishu_notify_detail"] = notify_result.get("feishu")
         except Exception as exc:
             result["feishu_push"] = f"failed: {exc}"
+
+    result["feishu_push_detail"] = build_feishu_push_detail(result["feishu_push"], result["ai_report"])
 
     WORKFLOW_LOGS.insert(
         0,
