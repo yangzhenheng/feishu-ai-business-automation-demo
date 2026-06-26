@@ -1,101 +1,115 @@
 from __future__ import annotations
 
-import json
-from pathlib import Path
 from typing import Any, Dict, List
 
 
-DATA_DIR = Path(__file__).resolve().parents[2] / "data"
-
-
-def _load_json(filename: str) -> Any:
-    return json.loads((DATA_DIR / filename).read_text(encoding="utf-8"))
-
-
 def get_shop_orders() -> List[Dict[str, Any]]:
-    return _load_json("sample_shop_orders.json")
+    return [
+        {
+            "order_id": "ORDER-20260626-001",
+            "platform": "抖音小店",
+            "shop_name": "广州女装直播间",
+            "sku": "SKU-DRESS-BLK-M",
+            "product_name": "黑色连衣裙 M码",
+            "quantity": 2,
+            "amount": 598,
+            "status": "已支付",
+            "created_at": "2026-06-26 10:18:00",
+        },
+        {
+            "order_id": "ORDER-20260626-002",
+            "platform": "天猫",
+            "shop_name": "夏季通勤女装旗舰店",
+            "sku": "SKU-TSHIRT-WHT-L",
+            "product_name": "白色T恤 L码",
+            "quantity": 5,
+            "amount": 445,
+            "status": "待发货",
+            "created_at": "2026-06-26 10:42:00",
+        },
+        {
+            "order_id": "ORDER-20260626-003",
+            "platform": "拼多多",
+            "shop_name": "广州女装清仓店",
+            "sku": "SKU-SKIRT-DENIM-S",
+            "product_name": "牛仔半身裙 S码",
+            "quantity": 1,
+            "amount": 89,
+            "status": "待客服确认",
+            "created_at": "2026-06-26 11:05:00",
+        },
+        {
+            "order_id": "ORDER-20260626-004",
+            "platform": "抖音小店",
+            "shop_name": "广州女装直播间",
+            "sku": "SKU-HOODIE-GRY-L",
+            "product_name": "灰色卫衣 L码",
+            "quantity": 8,
+            "amount": 1192,
+            "status": "急单",
+            "created_at": "2026-06-26 11:26:00",
+        },
+        {
+            "order_id": "ORDER-20260626-005",
+            "platform": "天猫",
+            "shop_name": "夏季通勤女装旗舰店",
+            "sku": "SKU-DRESS-FLORAL-M",
+            "product_name": "碎花连衣裙 M码",
+            "quantity": 1,
+            "amount": 229,
+            "status": "售后换码",
+            "created_at": "2026-06-26 11:48:00",
+        },
+    ]
 
 
 def sync_shop_orders() -> Dict[str, Any]:
-    orders = get_shop_orders()
-    abnormal = [
-        order
-        for order in orders
-        if order["order_status"] in {"售后中", "待客服确认"} or "换货" in order["buyer_note"] or "急" in order["buyer_note"]
-    ]
     return {
-        "source": "抖音小店 / 天猫店 / 拼多多店模拟同步",
-        "synced_count": len(orders),
-        "exception_count": len(abnormal),
-        "erp_order_pool_status": "已写入 ERP 订单池，等待库存和物流校验",
-        "next_action": [
-            "将售后中、买家备注包含急单/换货的订单标记为异常",
-            "触发 WMS 库存校验",
-            "P1 异常推送飞书审批或负责人任务",
-        ],
-        "exception_orders": [order["order_id"] for order in abnormal],
+        "module": "店铺订单同步",
+        "synced_count": 5,
+        "exception_count": 1,
+        "next_action": "写入ERP订单池，并触发库存校验",
     }
 
 
 def check_inventory() -> Dict[str, Any]:
-    inventory = _load_json("sample_wms_inventory.json")
-    low_stock = []
-    for item in inventory:
-        gap = max(item["safety_stock"] - item["available_stock"], 0)
-        if gap > 0:
-            low_stock.append(
-                {
-                    "sku": item["sku"],
-                    "product_name": item["product_name"],
-                    "warehouse": item["warehouse"],
-                    "available_stock": item["available_stock"],
-                    "safety_stock": item["safety_stock"],
-                    "gap_quantity": gap,
-                    "suggested_action": "创建采购补货审批，并同步运营调整推广节奏",
-                }
-            )
     return {
-        "checked_count": len(inventory),
-        "low_stock_count": len(low_stock),
-        "low_stock_skus": low_stock,
-        "next_action": "低库存 SKU 进入飞书审批流：采购确认补货 -> 仓储确认到货 -> 运营调整商品投放。",
+        "module": "WMS库存校验",
+        "low_stock": [
+            {"sku": "SKU-DRESS-BLK-M", "product": "黑色连衣裙 M码", "stock": 18, "safe_stock": 80, "gap": 62},
+            {"sku": "SKU-TSHIRT-WHT-L", "product": "白色T恤 L码", "stock": 40, "safe_stock": 120, "gap": 80},
+        ],
+        "next_action": "生成库存预警并推送飞书机器人",
     }
 
 
 def track_logistics() -> Dict[str, Any]:
-    records = _load_json("sample_logistics.json")
-    abnormal = [item for item in records if item["is_exception"]]
     return {
-        "tracking_count": len(records),
-        "exception_count": len(abnormal),
-        "records": records,
-        "next_action": "物流延迟、退回、少发漏发订单推送客服安抚，并升级仓储/物流专员处理。",
+        "module": "物流轨迹查询",
+        "tracking_no": "YT20260626001",
+        "status": "异常",
+        "reason": "揽收后超过24小时未更新",
+        "next_action": "通知客服跟进并同步客户解释话术",
     }
 
 
 def reconcile_finance() -> Dict[str, Any]:
-    rows = _load_json("sample_finance_reconcile.json")
-    total_order_amount = round(sum(row["order_amount"] for row in rows), 2)
-    total_received_amount = round(sum(row["received_amount"] for row in rows), 2)
-    total_diff = round(total_order_amount - total_received_amount, 2)
-    abnormal = [row for row in rows if row["diff_amount"] != 0]
     return {
-        "order_amount": total_order_amount,
-        "received_amount": total_received_amount,
-        "diff_amount": total_diff,
-        "diff_count": len(abnormal),
-        "diff_reasons": [row["diff_reason"] for row in abnormal],
-        "records": rows,
-        "suggested_action": "差异单进入财务复核审批，确认平台扣点、退款、优惠券和少结算原因。",
+        "module": "财务对账",
+        "order_amount": 23800,
+        "received_amount": 22600,
+        "difference": 1200,
+        "reason": "退款/平台扣点/优惠券未同步",
+        "next_action": "创建财务复核任务",
     }
 
 
 def collect_crm_leads() -> Dict[str, Any]:
-    leads = _load_json("sample_crm_leads.json")
-    high_intent = [lead for lead in leads if lead["intent_level"] == "高"]
     return {
-        "lead_count": len(leads),
-        "high_intent_count": len(high_intent),
-        "leads": leads,
-        "next_action": "高意向客户自动创建销售跟进任务，中意向客户进入私域运营池。",
+        "module": "CRM线索沉淀",
+        "leads": [
+            {"name": "刘女士", "source": "网站AI客服", "intent": "高", "status": "待跟进"},
+            {"name": "张先生", "source": "企业微信咨询", "intent": "中", "status": "已记录"},
+        ],
+        "next_action": "高意向客户推送销售负责人",
     }

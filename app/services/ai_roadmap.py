@@ -7,40 +7,34 @@ def get_ai_roadmap() -> Dict[str, List[Dict[str, str]]]:
     return {
         "roadmap": [
             {
-                "module": "客服知识库 RAG",
-                "data_source": "商品详情、尺码表、售后规则、物流话术、历史客服问答",
-                "business_value": "提升直播间和店铺客服回复一致性，减少新人培训成本。",
-                "phase": "V3 设计，V4 可接入向量库",
+                "name": "客服RAG",
+                "scenario": "网站 AI 客服、直播间客服、飞书客服助手",
+                "business_value": "基于商品、尺码、物流和售后知识库生成稳定回复。",
             },
             {
-                "module": "订单异常摘要",
-                "data_source": "订单池、异常表、物流轨迹、买家备注",
-                "business_value": "自动生成异常原因、责任部门和下一步动作。",
-                "phase": "V3 已用规则模拟，后续接 LLM Function Calling",
+                "name": "售后知识库",
+                "scenario": "退换货、少发漏发、尺码换货、补偿规则",
+                "business_value": "把售后规则结构化，减少客服人工判断成本。",
             },
             {
-                "module": "库存缺货预测",
-                "data_source": "库存、销量、活动日历、直播排期、补货周期",
-                "business_value": "提前识别断码断色风险，触发采购补货审批。",
-                "phase": "V3 路线设计，后续接 Prophet/XGBoost/LightGBM",
+                "name": "库存预测",
+                "scenario": "广州仓、佛山仓 SKU 安全库存和补货周期预测",
+                "business_value": "提前发现断码断色风险，触发采购补货审批。",
             },
             {
-                "module": "爆款 SKU 预警",
-                "data_source": "店铺订单、点击转化、加购、直播间成交曲线",
-                "business_value": "发现连衣裙、T恤、卫衣等爆发款，联动备货和投放。",
-                "phase": "V3 路线设计",
+                "name": "爆款SKU预测",
+                "scenario": "直播间订单、加购、转化率和活动排期分析",
+                "business_value": "识别连衣裙、T恤、卫衣等爆款趋势，辅助备货。",
             },
             {
-                "module": "财务对账异常识别",
-                "data_source": "店铺账单、ERP订单、退款售后、平台扣点",
-                "business_value": "自动定位少结算、退款延迟、优惠券承担差异。",
-                "phase": "V3 模拟 API",
+                "name": "财务异常识别",
+                "scenario": "店铺账单、ERP订单、退款售后和平台扣点对账",
+                "business_value": "自动定位回款差异并创建财务复核任务。",
             },
             {
-                "module": "多模型路由策略",
-                "data_source": "任务类型、成本、延迟、隐私等级、质量要求",
-                "business_value": "日报走高质量模型，分类走低成本模型，私域知识走本地或私有模型。",
-                "phase": "V2 已有 CC Switch 说明，V3 扩展到电商场景",
+                "name": "多模型路由",
+                "scenario": "日报、异常分类、客服回复、私域知识库等不同任务",
+                "business_value": "按质量、成本、延迟和隐私要求选择不同模型。",
             },
         ]
     }
