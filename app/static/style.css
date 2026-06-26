@@ -1,4 +1,4 @@
-:root {
+﻿:root {
   --bg: #f4f6f8;
   --card: #ffffff;
   --text: #172033;
@@ -357,3 +357,4 @@ footer { color: var(--muted); text-align: center; padding: 30px; }
   .panel-title { align-items: flex-start; flex-direction: column; }
   .form-row { grid-template-columns: 1fr; }
 }
+

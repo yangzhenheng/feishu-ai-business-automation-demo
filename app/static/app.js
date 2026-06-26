@@ -1,4 +1,4 @@
-async function getJson(url, options = {}) {
+﻿async function getJson(url, options = {}) {
   const response = await fetch(url, {
     headers: { Accept: 'application/json', ...(options.headers || {}) },
     ...options
@@ -363,3 +363,4 @@ loadAiRoadmap();
 loadFeishuDesign();
 loadWorkflowLogs();
 selectModel('daily_report');
+
