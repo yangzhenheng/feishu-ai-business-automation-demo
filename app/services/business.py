@@ -15,7 +15,7 @@ def get_dashboard(conn: sqlite3.Connection) -> Dict[str, Any]:
         "SELECT COUNT(*) AS c FROM inventory WHERE current_stock < safety_stock"
     ).fetchone()["c"]
     todo_count = conn.execute("SELECT COUNT(*) AS c FROM todos WHERE status != '已完成'").fetchone()["c"]
-    lead_count = conn.execute("SELECT COUNT(*) AS c FROM leads WHERE status != '已完成'").fetchone()["c"]
+    lead_count = conn.execute("SELECT COUNT(*) AS c FROM customer_leads WHERE status != '已完成'").fetchone()["c"]
 
     exceptions = rows_to_dicts(
         conn.execute(
@@ -51,7 +51,7 @@ def get_dashboard(conn: sqlite3.Connection) -> Dict[str, Any]:
         conn.execute(
             """
             SELECT name, contact, demand, intent_level, source, status, created_at
-            FROM leads
+            FROM customer_leads
             ORDER BY id DESC
             LIMIT 10
             """
@@ -216,37 +216,39 @@ def classify_exception_text(text: str) -> Dict[str, str]:
     lower = raw.lower()
     exception_type = "信息缺失"
     department = "业务/客服"
-    priority = "P2"
+    severity = "P2"
     next_action = "补齐关键信息，确认负责人和截止时间。"
 
     if any(k in raw for k in ["库存", "缺货", "补货", "安全库存", "供应商未发"]):
         exception_type = "库存不足 / 供应商延迟"
         department = "采购 / 仓储 / 供应商管理"
-        priority = "P1"
+        severity = "P1"
         next_action = "优先确认可用库存和供应商补货交期，同时准备替代SKU方案。"
     if any(k in raw for k in ["延期", "交期", "催单", "来不及", "超时"]):
         exception_type = "交期风险"
         department = "供应链 / 运营 / 客服"
-        priority = "P1" if priority != "P0" else priority
+        severity = "P1" if severity != "P0" else severity
         next_action = "同步客户预期，确认最晚发货时间，并升级负责人跟进。"
     if any(k in raw for k in ["质检", "不良", "返工", "瑕疵", "抽检"]):
         exception_type = "质检异常"
         department = "质检 / 生产 / 供应商"
-        priority = "P0" if any(k in raw for k in ["批量", "大面积", "严重"]) else "P1"
+        severity = "P0" if any(k in raw for k in ["批量", "大面积", "严重"]) else "P1"
         next_action = "立即隔离异常批次，复核不良比例，确认返工或替换方案。"
     if any(k in raw for k in ["客户没确认", "尺码", "颜色", "地址", "资料缺失", "信息缺失"]):
         exception_type = "客户信息缺失"
         department = "客服 / 销售"
-        priority = "P2"
+        severity = "P2"
         next_action = "由客服确认缺失信息，超过约定时间未回复则标记交期风险。"
     if any(k in lower for k in ["p0", "urgent", "紧急", "重大", "停发", "无法发货"]):
-        priority = "P0"
+        severity = "P0"
 
     return {
         "input": raw,
         "exception_type": exception_type,
-        "priority": priority,
+        "severity": severity,
+        "priority": severity,
         "owner_department": department,
+        "suggested_action": next_action,
         "next_action": next_action,
-        "structured_output": f"异常类型：{exception_type}\n严重等级：{priority}\n责任部门：{department}\n建议动作：{next_action}",
+        "structured_output": f"异常类型：{exception_type}\n严重等级：{severity}\n责任部门：{department}\n建议动作：{next_action}",
     }

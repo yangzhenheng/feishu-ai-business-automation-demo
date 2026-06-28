@@ -35,15 +35,41 @@ function showError(targetId, error) {
 }
 
 function renderBusinessCard(data, detailHtml = '') {
+  const riskItems = Array.isArray(data.risk_points) ? data.risk_points : [data.risk || '暂无明显风险'];
+  const actionItems = Array.isArray(data.next_actions) ? data.next_actions : [data.next_action || '等待下一步处理'];
   return `
     <div class="business-card">
       <div class="business-card-head">
         <span>${escapeHtml(data.module || '业务模块')}</span>
-        <strong>${escapeHtml(data.core_result || '已完成接口调用')}</strong>
+        <strong>${escapeHtml(data.result_summary || data.core_result || '已完成接口调用')}</strong>
+      </div>
+      <div class="numbers">
+        <span>状态：${escapeHtml(data.status || 'success')}</span>
+        <span>请求ID：${escapeHtml(data.request_id || 'local-demo')}</span>
+        <span>来源：${escapeHtml(data.source_system || '本地模拟系统')}</span>
       </div>
       ${detailHtml}
-      <div class="risk-line"><b>风险点：</b>${escapeHtml(data.risk || '暂无明显风险')}</div>
-      <div class="next-line"><b>下一步：</b>${escapeHtml(data.next_action || '等待下一步处理')}</div>
+      <div class="risk-line"><b>风险点：</b>${riskItems.map(escapeHtml).join('；')}</div>
+      <div class="next-line"><b>下一步：</b>${actionItems.map(escapeHtml).join('；')}</div>
+    </div>
+  `;
+}
+
+function renderTable(rows) {
+  if (!rows || rows.length === 0) {
+    return '<div class="empty-table">查询结果为空</div>';
+  }
+  const columns = Object.keys(rows[0]);
+  return `
+    <div class="table-wrap">
+      <table>
+        <thead><tr>${columns.map(col => `<th>${escapeHtml(col)}</th>`).join('')}</tr></thead>
+        <tbody>
+          ${rows.map(row => `
+            <tr>${columns.map(col => `<td>${escapeHtml(row[col])}</td>`).join('')}</tr>
+          `).join('')}
+        </tbody>
+      </table>
     </div>
   `;
 }
@@ -145,7 +171,8 @@ async function runFullFlow() {
       <div class="workflow-step ${step.status}">
         <span>Step ${step.step}</span>
         <strong>${escapeHtml(step.name)}</strong>
-        <small>${escapeHtml(step.summary)}</small>
+        <small>${escapeHtml(step.detail || step.summary)}</small>
+        <em>${escapeHtml(step.business_value || '')}</em>
       </div>
     `).join('');
     el('full-flow-report').textContent = data.ai_report;
@@ -188,15 +215,15 @@ async function runMockApi(type) {
     let detailHtml = '';
     if (type === 'inventory') {
       detailHtml = `<div class="mini-grid">${data.low_stock.map(item => `
-        <div><b>${escapeHtml(item.sku)}</b><br>${escapeHtml(item.product)}<br>当前 ${item.stock} / 安全 ${item.safe_stock} / 缺口 ${item.gap}</div>
+        <div><b>${escapeHtml(item.sku)}</b><br>${escapeHtml(item.product)}<br>当前 ${item.stock} / 安全 ${item.safe_stock} / 缺口 ${item.gap}<br>${escapeHtml(item.warehouse || '')}</div>
       `).join('')}</div>`;
     }
     if (type === 'finance') {
-      detailHtml = `<div class="numbers"><span>订单金额 ${data.order_amount}</span><span>已回款 ${data.received_amount}</span><span>差异 ${data.difference}</span></div>`;
+      detailHtml = renderTable(data.differences || []);
     }
     if (type === 'crm') {
       detailHtml = `<div class="mini-grid">${data.leads.map(item => `
-        <div><b>${escapeHtml(item.name)}</b><br>来源：${escapeHtml(item.source)}<br>意向：${escapeHtml(item.intent)} | ${escapeHtml(item.status)}</div>
+        <div><b>${escapeHtml(item.name)}</b><br>来源：${escapeHtml(item.source)}<br>意向：${escapeHtml(item.intent)} | ${escapeHtml(item.status)}<br>${escapeHtml(item.owner || '')}</div>
       `).join('')}</div>`;
     }
     if (type === 'sync') {
@@ -219,15 +246,17 @@ async function loadWorkflowLogs() {
     target.innerHTML = data.map(log => `
       <div class="item log-item ${escapeHtml(log.status)}">
         <div class="log-title">
-          <strong>${escapeHtml(log.workflow)}</strong>
+          <strong>${escapeHtml(log.workflow_name || log.workflow)}</strong>
           <span class="status-badge ${escapeHtml(log.status)}">${escapeHtml(log.status)}</span>
         </div>
         <div class="log-fields">
-          <span><b>执行时间：</b>${escapeHtml(log.time)}</span>
-          <span><b>工作流名称：</b>${escapeHtml(log.workflow)}</span>
-          <span><b>触发方式：</b>${escapeHtml(log.trigger)}</span>
+          <span><b>执行时间：</b>${escapeHtml(log.executed_at || log.time)}</span>
+          <span><b>工作流名称：</b>${escapeHtml(log.workflow_name || log.workflow)}</span>
+          <span><b>触发方式：</b>${escapeHtml(log.trigger_type || log.trigger)}</span>
           <span><b>执行状态：</b>${escapeHtml(log.status)}</span>
+          <span><b>飞书推送：</b>${escapeHtml(log.pushed_to_feishu || 'skipped')}</span>
           <span class="log-summary"><b>结果摘要：</b>${escapeHtml(log.summary)}</span>
+          <span class="log-summary"><b>下一步：</b>${escapeHtml(log.next_action || '继续跟进异常闭环')}</span>
         </div>
       </div>
     `).join('');
@@ -244,8 +273,9 @@ async function loadSqlExamples() {
     target.innerHTML = data.examples.map(item => `
       <div class="item sql-item">
         <strong>${escapeHtml(item.title)}</strong>
-        <small>${escapeHtml(item.business_value || item.value || '')}</small>
+        <small>${escapeHtml(item.description || item.business_value || item.value || '')}</small>
         <code>${escapeHtml(item.sql)}</code>
+        ${renderTable(item.rows || [])}
       </div>
     `).join('');
   } catch (error) {
@@ -302,11 +332,16 @@ async function classifyException() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ text: el('exception-text').value })
     });
-    el('exception-ai').textContent = `${data.structured_output}
+    el('exception-ai').textContent = `异常类型：${data.exception_type}
+严重等级：${data.severity}
+责任部门：${data.owner_department}
+建议动作：${data.suggested_action}
 
 模型路由：${data.model_route.primary_model}
 备用模型：${data.model_route.fallback_model}
-选择原因：${data.model_route.reason}`;
+成本策略：${data.model_route.cost_strategy}
+隐私策略：${data.model_route.privacy_strategy}
+选择原因：${data.route_reason || data.model_route.reason}`;
   } catch (error) {
     showError('exception-ai', error);
   }
@@ -325,6 +360,7 @@ async function selectModel(taskType) {
 备用模型：${data.fallback_model}
 质量目标：${data.quality_target}
 成本策略：${data.cost_strategy}
+隐私策略：${data.privacy_strategy}
 选择原因：${data.reason}`;
   } catch (error) {
     showError('model-route', error);

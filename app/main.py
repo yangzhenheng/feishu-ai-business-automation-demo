@@ -26,7 +26,7 @@ from app.v3_api import router as v3_router
 app = FastAPI(
     title="Feishu AI Business Automation Demo",
     description="AI + 飞书低代码 + Webhook + ERP/WMS/CRM + 女装电商业务自动化 Demo",
-    version="4.0.0",
+    version="5.0.0",
 )
 
 app.include_router(v3_router)
@@ -130,6 +130,22 @@ def api_customer_service(req: CustomerServiceRequest):
                     dt.date.today().isoformat(),
                 ),
             )
+            conn.execute(
+                """
+                INSERT INTO customer_leads(name, contact, demand, intent_level, source, status, owner, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    req.name,
+                    req.contact,
+                    answer["demand"],
+                    answer["intent_level"],
+                    "AI客服Demo",
+                    "待跟进",
+                    "销售负责人",
+                    dt.date.today().isoformat(),
+                ),
+            )
             conn.commit()
         finally:
             conn.close()
@@ -156,6 +172,7 @@ def api_exception_classify(req: ExceptionClassifyRequest):
     route = select_model("exception_classification")
     result = classify_exception_text(req.text)
     result["model_route"] = route
+    result["route_reason"] = route["reason"]
     return result
 
 

@@ -13,6 +13,7 @@ class ModelRoute:
     quality_target: str
     cost_strategy: str
     reason: str
+    privacy_strategy: str
 
 
 ROUTES: Dict[str, ModelRoute] = {
@@ -24,6 +25,7 @@ ROUTES: Dict[str, ModelRoute] = {
         quality_target="结构完整、表达专业、能给出可执行建议",
         cost_strategy="正式日报优先质量，批量日报可切低成本模型",
         reason="日报需要逻辑完整和表达稳定，优先使用综合能力强的模型。",
+        privacy_strategy="日报只发送汇总指标和异常摘要，避免暴露客户联系方式。",
     ),
     "exception_classification": ModelRoute(
         task_type="exception_classification",
@@ -33,6 +35,7 @@ ROUTES: Dict[str, ModelRoute] = {
         quality_target="结构化输出稳定，能识别异常类型、等级和责任部门",
         cost_strategy="高频批量任务优先低成本模型",
         reason="异常分类偏结构化和批量处理，重点是成本、速度和稳定格式。",
+        privacy_strategy="只传异常描述和订单号，不传客户手机号、地址等敏感字段。",
     ),
     "customer_service": ModelRoute(
         task_type="customer_service",
@@ -42,6 +45,7 @@ ROUTES: Dict[str, ModelRoute] = {
         quality_target="中文表达自然，能识别意向并沉淀需求",
         cost_strategy="高意向客户可用更强模型，普通FAQ用低成本模型",
         reason="客服场景需要中文表达、需求追问和线索识别。",
+        privacy_strategy="客户联系方式入库前脱敏展示，私域客户资料优先走企业内部模型。",
     ),
     "code_generation": ModelRoute(
         task_type="code_generation",
@@ -51,6 +55,7 @@ ROUTES: Dict[str, ModelRoute] = {
         quality_target="代码可读、可运行、具备错误处理",
         cost_strategy="复杂代码用强模型，简单脚本用低成本模型",
         reason="代码任务优先选择编程能力强、上下文稳定的模型。",
+        privacy_strategy="不上传真实密钥、Webhook 地址、数据库密码和客户数据。",
     ),
     "private_knowledge": ModelRoute(
         task_type="private_knowledge",
@@ -60,6 +65,7 @@ ROUTES: Dict[str, ModelRoute] = {
         quality_target="可在隐私场景下回答内部SOP和流程问题",
         cost_strategy="内部资料优先本地模型，公开资料可用云端模型",
         reason="企业内部SOP、客户资料和流程文档需要兼顾数据安全。",
+        privacy_strategy="优先本地向量库和本地模型，外部模型只处理脱敏后的公开知识。",
     ),
 }
 
