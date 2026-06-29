@@ -89,7 +89,7 @@ POST /api/demo/run-full-flow
 
 返回并展示：
 
-- 8 个流程步骤卡片
+- 9 个流程步骤卡片，包含飞书多维表格 Mock 同步
 - AI 业务日报
 - 飞书机器人推送状态
 - 业务价值卡片
@@ -99,6 +99,25 @@ POST /api/demo/run-full-flow
 面试讲解话术：
 
 > 我不是只做了一个页面，而是把女装电商中的订单、库存、异常、客户线索、财务对账和日报串成了一个可演示的自动化闭环。
+
+## V5.2：工程稳定化说明
+
+本阶段没有继续堆叠复杂新功能，而是把作品集 Demo 收口成更稳定的可演示工程：
+
+- FastAPI 核心接口均有 smoke tests 覆盖，`/health`、`/docs`、SQL、Workflow、Mock API、AI 异常分类、多模型路由、飞书多维表格 Mock 同步均可返回 200。
+- SQLite 默认使用 `DATABASE_URL=sqlite:///data/app.db`，首次启动会自动创建数据目录和业务表；测试环境通过临时数据库隔离。
+- `POST /api/demo/run-full-flow` 会写入 `workflow_logs`，页面刷新后仍能看到最近执行记录。
+- `/api/sql/examples` 的 `rows` 来自 SQLite 实际查询结果，不是前端静态文案。
+- 飞书机器人 Webhook 和飞书多维表格 Real API 都通过环境变量配置；默认 Mock 模式不会伪装成生产接入，也不会把密钥提交到 GitHub。
+- 已加入 GitHub Actions CI：安装依赖、`python -m compileall app`、`pytest -q`。
+
+本地验收命令：
+
+```bash
+python -m compileall app
+pytest -q
+docker compose config
+```
 
 ## 主要 API
 

@@ -114,6 +114,7 @@ class FeishuBitableClient:
             self.sync_report_to_bitable(payload.get("reports", [])),
         ]
         synced_records = sum(item["data"]["synced_records"] for item in results)
+        synced_tables = ["orders", "inventory", "exceptions", "leads", "reports"]
         mode = "real_ready" if all(item["mode"] == "real_ready" for item in results) else "mock"
         message = "Mock 模式：订单、库存、异常、客户线索和AI日报已模拟同步到飞书多维表格"
         if mode == "real_ready":
@@ -124,10 +125,15 @@ class FeishuBitableClient:
             "module": self.module,
             "action": "sync_all",
             "message": message,
+            "synced_tables": synced_tables,
+            "total_synced_records": synced_records,
+            "results": results,
+            "next_action": "配置真实 FEISHU_APP_ID、FEISHU_APP_SECRET、FEISHU_APP_TOKEN 和 TABLE_ID 后可切换真实 API",
             "data": {
                 "synced_records": synced_records,
+                "total_synced_records": synced_records,
                 "target_table": "orders,inventory,exceptions,leads,reports",
-                "synced_tables": ["orders", "inventory", "exceptions", "leads", "reports"],
+                "synced_tables": synced_tables,
                 "next_action": "配置真实 FEISHU_APP_ID、FEISHU_APP_SECRET、FEISHU_APP_TOKEN 和 TABLE_ID 后可切换真实 API",
                 "results": results,
             },

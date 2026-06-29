@@ -7,10 +7,25 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-DB_PATH = os.getenv("DATABASE_PATH", "./business_demo.db")
+def resolve_db_path() -> str:
+    explicit_path = os.getenv("DATABASE_PATH")
+    if explicit_path:
+        return explicit_path
+
+    database_url = os.getenv("DATABASE_URL", "sqlite:///data/app.db")
+    if database_url.startswith("sqlite:///"):
+        return database_url.replace("sqlite:///", "", 1)
+    if database_url.startswith("sqlite://"):
+        return database_url.replace("sqlite://", "", 1)
+    return "data/app.db"
+
+
+DB_PATH = resolve_db_path()
 
 
 def get_connection() -> sqlite3.Connection:
+    global DB_PATH
+    DB_PATH = resolve_db_path()
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
@@ -22,6 +37,8 @@ def execute_many(conn: sqlite3.Connection, sql: str, rows: Iterable[Tuple]) -> N
 
 
 def init_db() -> None:
+    global DB_PATH
+    DB_PATH = resolve_db_path()
     Path(DB_PATH).parent.mkdir(parents=True, exist_ok=True)
     conn = get_connection()
     cur = conn.cursor()

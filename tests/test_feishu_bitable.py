@@ -10,6 +10,7 @@ def build_client(tmp_path, monkeypatch):
     import app.db as db
 
     db.DB_PATH = os.environ["DATABASE_PATH"]
+    db.init_db()
 
     from app.main import app
 
@@ -39,6 +40,9 @@ def test_feishu_bitable_status_and_sync_endpoints(tmp_path, monkeypatch):
         assert payload["ok"] is True
         assert payload["synced_records"] >= 0
         assert payload["next_action"]
+        if endpoint.endswith("/all"):
+            assert payload["total_synced_records"] >= payload["synced_records"]
+            assert payload["synced_tables"] == ["orders", "inventory", "exceptions", "leads", "reports"]
 
 
 def test_full_flow_contains_feishu_bitable_step(tmp_path, monkeypatch):

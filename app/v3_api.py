@@ -53,9 +53,11 @@ def flatten_bitable_response(response: Dict[str, Any]) -> Dict[str, Any]:
     return {
         **response,
         "synced_records": data.get("synced_records", 0),
+        "total_synced_records": data.get("total_synced_records", response.get("total_synced_records", data.get("synced_records", 0))),
         "target_table": data.get("target_table"),
-        "synced_tables": data.get("synced_tables"),
-        "next_action": data.get("next_action"),
+        "synced_tables": data.get("synced_tables", response.get("synced_tables")),
+        "results": data.get("results", response.get("results")),
+        "next_action": data.get("next_action", response.get("next_action")),
     }
 
 
@@ -418,6 +420,7 @@ def api_demo_run_full_flow():
             result["feishu_push"] = f"failed: {exc}"
 
     result["feishu_push_detail"] = build_feishu_push_detail(result["feishu_push"], result["ai_report"])
+    result["feishu_webhook_status"] = result["feishu_push_detail"]
     bitable_data = bitable_payload()
     bitable_data["reports"] = [
         {"report_type": "daily", "content": result["ai_report"], "model_route": "daily_report", "created_at": now_text()}
@@ -439,7 +442,7 @@ def api_demo_run_full_flow():
 
     conn = get_connection()
     try:
-        conn.execute(
+        cursor = conn.execute(
             """
             INSERT INTO workflow_logs(workflow_name, trigger_type, status, executed_at, summary, pushed_to_feishu, next_action)
             VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -454,6 +457,7 @@ def api_demo_run_full_flow():
                 result["feishu_push_detail"]["next_action"],
             ),
         )
+        log_id = cursor.lastrowid
         conn.execute(
             "INSERT INTO ai_reports(report_type, content, model_route, created_at) VALUES (?, ?, ?, ?)",
             ("daily", result["ai_report"], "daily_report", now_text()),
@@ -461,6 +465,16 @@ def api_demo_run_full_flow():
         conn.commit()
     finally:
         conn.close()
+    result["log_id"] = log_id
+    result["workflow_log"] = {
+        "id": log_id,
+        "workflow_name": "女装电商AI业务闭环",
+        "trigger_type": "manual_demo",
+        "status": "success",
+        "summary": "同步订单5条，异常4条，库存预警已生成，AI日报已生成",
+        "pushed_to_feishu": result["feishu_push_detail"]["status"],
+        "next_action": result["feishu_push_detail"]["next_action"],
+    }
     return result
 
 

@@ -1,10 +1,12 @@
 .venv/
 __pycache__/
+**pycache**/
 *.pyc
 .env
 *.db
 business_demo.db
 .pytest_cache/
+node_modules/
 .DS_Store
 .idea/
 .vscode/

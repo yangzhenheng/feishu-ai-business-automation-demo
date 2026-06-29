@@ -97,6 +97,7 @@ function renderFeishuBitableStatus(data) {
 function renderFeishuBitableSync(data) {
   const missing = data.missing_config && data.missing_config.length ? `<div class="risk-line"><b>缺失配置：</b>${escapeHtml(data.missing_config.join(' / '))}</div>` : '';
   const tables = Array.isArray(data.synced_tables) ? data.synced_tables.join(' / ') : (data.target_table || 'bitable');
+  const syncedRecords = data.total_synced_records ?? data.synced_records ?? 0;
   return `
     <div class="business-card">
       <div class="business-card-head">
@@ -105,7 +106,7 @@ function renderFeishuBitableSync(data) {
       </div>
       <div class="numbers">
         <span>模式：${escapeHtml(data.mode || 'mock')}</span>
-        <span>记录数：${escapeHtml(data.synced_records || 0)}</span>
+        <span>记录数：${escapeHtml(syncedRecords)}</span>
         <span>目标表：${escapeHtml(tables)}</span>
       </div>
       ${missing}
