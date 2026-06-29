@@ -90,6 +90,27 @@
         <div id="mock-api-result" class="business-card-placeholder">选择一个按钮，查看模块名称、核心结果、风险点和下一步动作。</div>
     </section>
 
+    <section class="panel full">
+      <div class="panel-title">
+        <div>
+          <p class="eyebrow dark">Feishu Bitable</p>
+          <h2>飞书多维表格接入</h2>
+          <p>Mock 模式可完整演示业务同步，真实模式预留 App ID / Secret / App Token / Table ID 配置。</p>
+        </div>
+      </div>
+      <div class="command-row">
+        <button onclick="checkFeishuBitable()">检查飞书配置</button>
+        <button onclick="syncFeishuBitable('orders')">同步订单</button>
+        <button onclick="syncFeishuBitable('inventory')">同步库存</button>
+        <button onclick="syncFeishuBitable('exceptions')">同步异常</button>
+        <button onclick="syncFeishuBitable('leads')">同步客户线索</button>
+        <button onclick="syncFeishuBitable('report')">同步 AI 日报</button>
+        <button class="primary-action" onclick="syncFeishuBitable('all')">一键同步全部</button>
+      </div>
+      <div id="feishu-bitable-status" class="business-card-placeholder">点击“检查飞书配置”，查看当前 mock / real 模式和缺失配置。</div>
+      <div id="feishu-bitable-result" class="list"></div>
+    </section>
+
     <section class="grid-two">
       <div class="panel">
         <div class="panel-title">

@@ -74,6 +74,46 @@ function renderTable(rows) {
   `;
 }
 
+function renderFeishuBitableStatus(data) {
+  const missing = data.missing_config && data.missing_config.length ? data.missing_config.join(' / ') : '无';
+  const configText = data.config_complete ? '完整' : '缺失';
+  return `
+    <div class="business-card">
+      <div class="business-card-head">
+        <span>Feishu Bitable</span>
+        <strong>${escapeHtml(data.message || '飞书多维表格配置状态')}</strong>
+      </div>
+      <div class="numbers">
+        <span>当前模式：${escapeHtml(data.current_mode || data.mode || 'mock')}</span>
+        <span>真实API：${data.enable_real_api ? '已开启' : '未开启'}</span>
+        <span>配置状态：${escapeHtml(configText)}</span>
+      </div>
+      <div class="risk-line"><b>缺失配置：</b>${escapeHtml(missing)}</div>
+      <div class="next-line"><b>下一步：</b>${escapeHtml(data.next_action || '保持 Mock 模式演示，后续再配置真实飞书参数。')}</div>
+    </div>
+  `;
+}
+
+function renderFeishuBitableSync(data) {
+  const missing = data.missing_config && data.missing_config.length ? `<div class="risk-line"><b>缺失配置：</b>${escapeHtml(data.missing_config.join(' / '))}</div>` : '';
+  const tables = Array.isArray(data.synced_tables) ? data.synced_tables.join(' / ') : (data.target_table || 'bitable');
+  return `
+    <div class="business-card">
+      <div class="business-card-head">
+        <span>${escapeHtml(data.module || 'feishu_bitable')} | ${escapeHtml(data.action || 'sync')}</span>
+        <strong>${escapeHtml(data.message || '同步完成')}</strong>
+      </div>
+      <div class="numbers">
+        <span>模式：${escapeHtml(data.mode || 'mock')}</span>
+        <span>记录数：${escapeHtml(data.synced_records || 0)}</span>
+        <span>目标表：${escapeHtml(tables)}</span>
+      </div>
+      ${missing}
+      <div class="next-line"><b>下一步：</b>${escapeHtml(data.next_action || '配置真实飞书参数后可切换 real 模式。')}</div>
+    </div>
+  `;
+}
+
 function renderFeishuPushStatus(data) {
   const detail = data.feishu_push_detail || {};
   const rawStatus = detail.status || data.feishu_push || 'skipped';
@@ -235,6 +275,42 @@ async function runMockApi(type) {
     el('mock-api-result').innerHTML = renderBusinessCard(data, detailHtml);
   } catch (error) {
     showError('mock-api-result', error);
+  }
+}
+
+async function checkFeishuBitable() {
+  const target = el('feishu-bitable-status');
+  target.textContent = '正在检查飞书多维表格配置...';
+  try {
+    const data = await getJson('/api/feishu/bitable/status');
+    target.innerHTML = renderFeishuBitableStatus(data);
+  } catch (error) {
+    showError('feishu-bitable-status', error);
+  }
+}
+
+async function syncFeishuBitable(type) {
+  const target = el('feishu-bitable-result');
+  const routes = {
+    orders: '/api/feishu/bitable/sync/orders',
+    inventory: '/api/feishu/bitable/sync/inventory',
+    exceptions: '/api/feishu/bitable/sync/exceptions',
+    leads: '/api/feishu/bitable/sync/leads',
+    report: '/api/feishu/bitable/sync/report',
+    all: '/api/feishu/bitable/sync/all'
+  };
+  const url = routes[type];
+  if (!url) {
+    target.innerHTML = '<div class="item error">未知同步类型</div>';
+    return;
+  }
+  target.innerHTML = '<div class="item">正在同步到飞书多维表格 Mock 客户端...</div>';
+  try {
+    const data = await getJson(url, { method: 'POST' });
+    target.innerHTML = renderFeishuBitableSync(data);
+    await checkFeishuBitable();
+  } catch (error) {
+    target.innerHTML = `<div class="item error">接口调用失败：${escapeHtml(error.message)}</div>`;
   }
 }
 
@@ -419,6 +495,7 @@ async function loadFeishuDesign() {
 Object.assign(window, {
   askCustomerService,
   classifyException,
+  checkFeishuBitable,
   loadAiRoadmap,
   loadDashboard,
   loadEcommerceFlow,
@@ -429,6 +506,7 @@ Object.assign(window, {
   runCommand,
   runFullFlow,
   runMockApi,
+  syncFeishuBitable,
   selectModel
 });
 
@@ -437,5 +515,6 @@ loadSqlExamples();
 loadAiRoadmap();
 loadFeishuDesign();
 loadWorkflowLogs();
+checkFeishuBitable();
 selectModel('daily_report');
 

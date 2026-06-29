@@ -8,6 +8,7 @@ from typing import Any, Dict, List
 from fastapi import APIRouter
 
 from app.db import get_connection
+from app.services.feishu_bitable import FeishuBitableClient
 from app.services.notifier import notify_all
 
 router = APIRouter()
@@ -31,6 +32,71 @@ def query_rows(sql: str) -> List[Dict[str, Any]]:
         return rows_to_dicts(conn.execute(sql).fetchall())
     finally:
         conn.close()
+
+
+def bitable_payload() -> Dict[str, List[Dict[str, Any]]]:
+    conn = get_connection()
+    try:
+        return {
+            "orders": rows_to_dicts(conn.execute("SELECT * FROM orders ORDER BY id DESC LIMIT 20").fetchall()),
+            "inventory": rows_to_dicts(conn.execute("SELECT * FROM inventory ORDER BY id DESC LIMIT 20").fetchall()),
+            "exceptions": rows_to_dicts(conn.execute("SELECT * FROM exceptions ORDER BY id DESC LIMIT 20").fetchall()),
+            "leads": rows_to_dicts(conn.execute("SELECT * FROM customer_leads ORDER BY id DESC LIMIT 20").fetchall()),
+            "reports": rows_to_dicts(conn.execute("SELECT * FROM ai_reports ORDER BY id DESC LIMIT 10").fetchall()),
+        }
+    finally:
+        conn.close()
+
+
+def flatten_bitable_response(response: Dict[str, Any]) -> Dict[str, Any]:
+    data = response.get("data", {})
+    return {
+        **response,
+        "synced_records": data.get("synced_records", 0),
+        "target_table": data.get("target_table"),
+        "synced_tables": data.get("synced_tables"),
+        "next_action": data.get("next_action"),
+    }
+
+
+@router.get("/api/feishu/bitable/status")
+def api_feishu_bitable_status():
+    return FeishuBitableClient().health_check()
+
+
+@router.post("/api/feishu/bitable/sync/orders")
+def api_feishu_bitable_sync_orders():
+    payload = bitable_payload()
+    return flatten_bitable_response(FeishuBitableClient().sync_orders_to_bitable(payload["orders"]))
+
+
+@router.post("/api/feishu/bitable/sync/inventory")
+def api_feishu_bitable_sync_inventory():
+    payload = bitable_payload()
+    return flatten_bitable_response(FeishuBitableClient().sync_inventory_to_bitable(payload["inventory"]))
+
+
+@router.post("/api/feishu/bitable/sync/exceptions")
+def api_feishu_bitable_sync_exceptions():
+    payload = bitable_payload()
+    return flatten_bitable_response(FeishuBitableClient().sync_exceptions_to_bitable(payload["exceptions"]))
+
+
+@router.post("/api/feishu/bitable/sync/leads")
+def api_feishu_bitable_sync_leads():
+    payload = bitable_payload()
+    return flatten_bitable_response(FeishuBitableClient().sync_leads_to_bitable(payload["leads"]))
+
+
+@router.post("/api/feishu/bitable/sync/report")
+def api_feishu_bitable_sync_report():
+    payload = bitable_payload()
+    return flatten_bitable_response(FeishuBitableClient().sync_report_to_bitable(payload["reports"]))
+
+
+@router.post("/api/feishu/bitable/sync/all")
+def api_feishu_bitable_sync_all():
+    return flatten_bitable_response(FeishuBitableClient().sync_all_to_bitable(bitable_payload()))
 
 
 @router.get("/api/ecommerce/flow")
@@ -352,6 +418,25 @@ def api_demo_run_full_flow():
             result["feishu_push"] = f"failed: {exc}"
 
     result["feishu_push_detail"] = build_feishu_push_detail(result["feishu_push"], result["ai_report"])
+    bitable_data = bitable_payload()
+    bitable_data["reports"] = [
+        {"report_type": "daily", "content": result["ai_report"], "model_route": "daily_report", "created_at": now_text()}
+    ] + bitable_data.get("reports", [])
+    bitable_sync = FeishuBitableClient().sync_all_to_bitable(bitable_data)
+    result["feishu_bitable_sync"] = flatten_bitable_response(bitable_sync)
+    result["steps"].append(
+        {
+            "step": 9,
+            "name": "飞书多维表格同步",
+            "status": "success",
+            "detail": "Mock 模式下已模拟同步订单、库存、异常、客户线索和AI日报",
+            "business_value": "让业务数据可以沉淀到飞书低代码表格，方便运营、客服、供应链协作",
+            "mode": result["feishu_bitable_sync"]["mode"],
+            "synced_tables": ["orders", "inventory", "exceptions", "leads", "reports"],
+            "next_action": "配置真实飞书开放平台参数后可切换到 real 模式",
+        }
+    )
+
     conn = get_connection()
     try:
         conn.execute(
