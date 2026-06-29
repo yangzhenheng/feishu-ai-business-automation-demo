@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="520" viewBox="0 0 1400 520" role="img" aria-labelledby="title desc">
+  <title id="title">AI Business FlowPilot V5 Business Flow</title>
+  <desc id="desc">Nine-step ecommerce automation workflow from shop order sync to Feishu Bitable sync.</desc>
+  <defs>
+    <style>
+      .bg{fill:#f8fafc}.card{fill:#fff;stroke:#d6dde8;stroke-width:2}.num{fill:#0f766e}.warn{fill:#d97706}.ok{fill:#2563eb}.text{font:700 22px Arial,"Microsoft YaHei",sans-serif;fill:#172033}.small{font:600 15px Arial,"Microsoft YaHei",sans-serif;fill:#334155}.tiny{font:500 13px Arial,"Microsoft YaHei",sans-serif;fill:#667085}.white{fill:#fff}.arrow{stroke:#475569;stroke-width:3;fill:none;marker-end:url(#arrow)}
+    </style>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#475569"/>
+    </marker>
+  </defs>
+  <rect class="bg" width="1400" height="520"/>
+  <text x="54" y="58" class="text">V5 女装电商 AI 业务闭环流程图</text>
+  <text x="54" y="88" class="tiny">店铺订单 → ERP → WMS → 异常 → 飞书通知 → CRM → 财务 → AI日报 → 飞书多维表格同步</text>
+
+  <g transform="translate(50,130)">
+    <rect class="card" width="180" height="105" rx="14"/>
+    <circle class="num" cx="28" cy="28" r="18"/><text x="23" y="34" class="white small">1</text>
+    <text x="24" y="68" class="small">店铺订单同步</text>
+    <text x="24" y="92" class="tiny">抖音 / 天猫 / 拼多多</text>
+  </g>
+  <path d="M230 182 L280 182" class="arrow"/>
+  <g transform="translate(280,130)">
+    <rect class="card" width="180" height="105" rx="14"/>
+    <circle class="num" cx="28" cy="28" r="18"/><text x="23" y="34" class="white small">2</text>
+    <text x="24" y="68" class="small">ERP订单池入库</text>
+    <text x="24" y="92" class="tiny">统一订单状态</text>
+  </g>
+  <path d="M460 182 L510 182" class="arrow"/>
+  <g transform="translate(510,130)">
+    <rect class="card" width="180" height="105" rx="14"/>
+    <circle class="warn" cx="28" cy="28" r="18"/><text x="23" y="34" class="white small">3</text>
+    <text x="24" y="68" class="small">WMS库存校验</text>
+    <text x="24" y="92" class="tiny">识别低库存 SKU</text>
+  </g>
+  <path d="M690 182 L740 182" class="arrow"/>
+  <g transform="translate(740,130)">
+    <rect class="card" width="180" height="105" rx="14"/>
+    <circle class="warn" cx="28" cy="28" r="18"/><text x="23" y="34" class="white small">4</text>
+    <text x="24" y="68" class="small">异常单生成</text>
+    <text x="24" y="92" class="tiny">库存 / 交期 / 物流</text>
+  </g>
+  <path d="M920 182 L970 182" class="arrow"/>
+  <g transform="translate(970,130)">
+    <rect class="card" width="180" height="105" rx="14"/>
+    <circle class="ok" cx="28" cy="28" r="18"/><text x="23" y="34" class="white small">5</text>
+    <text x="24" y="68" class="small">飞书机器人通知</text>
+    <text x="24" y="92" class="tiny">Webhook 状态展示</text>
+  </g>
+
+  <path d="M1060 235 C1060 280, 280 280, 280 320" class="arrow"/>
+
+  <g transform="translate(170,320)">
+    <rect class="card" width="200" height="105" rx="14"/>
+    <circle class="num" cx="28" cy="28" r="18"/><text x="23" y="34" class="white small">6</text>
+    <text x="24" y="68" class="small">CRM客户线索沉淀</text>
+    <text x="24" y="92" class="tiny">高意向客户跟进</text>
+  </g>
+  <path d="M370 372 L430 372" class="arrow"/>
+  <g transform="translate(430,320)">
+    <rect class="card" width="200" height="105" rx="14"/>
+    <circle class="warn" cx="28" cy="28" r="18"/><text x="23" y="34" class="white small">7</text>
+    <text x="24" y="68" class="small">财务回款对账</text>
+    <text x="24" y="92" class="tiny">平台扣点 / 退款差异</text>
+  </g>
+  <path d="M630 372 L690 372" class="arrow"/>
+  <g transform="translate(690,320)">
+    <rect class="card" width="200" height="105" rx="14"/>
+    <circle class="ok" cx="28" cy="28" r="18"/><text x="23" y="34" class="white small">8</text>
+    <text x="24" y="68" class="small">AI日报生成</text>
+    <text x="24" y="92" class="tiny">异常 / 库存 / 线索摘要</text>
+  </g>
+  <path d="M890 372 L950 372" class="arrow"/>
+  <g transform="translate(950,320)">
+    <rect class="card" width="230" height="105" rx="14"/>
+    <circle class="ok" cx="28" cy="28" r="18"/><text x="23" y="34" class="white small">9</text>
+    <text x="24" y="68" class="small">飞书多维表格同步</text>
+    <text x="24" y="92" class="tiny">Mock 演示，Real API 预留</text>
+  </g>
+</svg>

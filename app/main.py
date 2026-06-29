@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 import datetime as dt
+from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import Optional
+from typing import AsyncIterator, Optional
 
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
@@ -23,10 +24,18 @@ from app.services.model_router import get_all_routes, select_model
 from app.services.notifier import notify_all
 from app.v3_api import router as v3_router
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+    init_db()
+    yield
+
+
 app = FastAPI(
     title="Feishu AI Business Automation Demo",
     description="AI + 飞书低代码 + Webhook + ERP/WMS/CRM + 女装电商业务自动化 Demo",
     version="5.0.0",
+    lifespan=lifespan,
 )
 
 app.include_router(v3_router)
@@ -57,11 +66,6 @@ class ExceptionClassifyRequest(BaseModel):
 
 class ModelRouteRequest(BaseModel):
     task_type: str
-
-
-@app.on_event("startup")
-def on_startup() -> None:
-    init_db()
 
 
 @app.get("/", response_class=HTMLResponse)
